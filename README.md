@@ -10,7 +10,9 @@ A small, unofficial warband builder for **Planet 28 (2nd edition)** by Mammoth M
 - Squads of 3–10 members (profile cost × members)
 - Rule checks: minimum 2 characters, points limit, Barbaric vs Complex, Animal abilities, missing ammo for Reload weapons, clashing traits
 - Character sheets laid out like the book's (Ctrl/Cmd+P to print)
-- A photo for each character (shown on the roster and sheets)
+- A photo for each character or vehicle (shown on the roster and sheets)
+- Vehicles: types, the building grid with sections and facings, hard points and turrets with weapons, traits and abilities
+- Campaigns: credits and campaign points, recording games, the injury and vehicle damage tables, hidden agendas, paying for upgrades and recruits
 - Custom weapon forge using the book's formula (max damage + range, +10 one-handed, + special rules)
 - Several saved warbands per browser; copy a warband as text to share it
 
@@ -22,5 +24,5 @@ Everything is in `index.html`. The rules tables (traits, abilities, weapons, arm
 
 ## Not yet included
 
-- Vehicles
-- Campaign tracking (injuries, campaign points, credits between games)
+- Solo and co-op rules (single character warbands, enemy warbands)
+- Tracking section damage during a game

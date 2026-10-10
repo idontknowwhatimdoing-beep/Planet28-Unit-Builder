@@ -1,5 +1,5 @@
 <title>Planet 28 Warband Builder</title>
-<meta name="description" content="Build Planet 28 (2nd edition) warbands: points, traits, abilities, equipment, squads, custom weapons and character sheets.">
+<meta name="description" content="Build Planet 28 (2nd edition) warbands and vehicles, print character sheets and track campaigns.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -248,8 +248,90 @@ textarea.input { resize: vertical; min-height: 70px; }
 .note { font-size: 13px; color: var(--muted); }
 .toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--panel); padding: 8px 14px; border-radius: var(--r); font-size: 14px; z-index: 50; }
 
+/* ---------- roster extras ---------- */
+.rail-h { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .1em; font-size: 14px; color: var(--muted); margin-top: 6px; }
+.pill.warn { border-color: var(--warn); color: var(--warn); }
+.pill.bad { border-color: var(--bad); color: var(--bad); }
+.rcard.gone { opacity: .55; }
+.rcard.gone .nm { text-decoration: line-through; text-decoration-thickness: 1px; }
+.dot.info { background: var(--muted); }
+.inj { color: var(--accent); font-weight: 500; }
+.banner { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: center; padding: 12px 14px; border: 1px solid var(--warn); border-left-width: 4px; border-radius: var(--r); background: var(--panel); }
+.banner.bad { border-color: var(--bad); }
+.banner .acts, .acts { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.warn-t { color: var(--warn); }
+
+/* ---------- vehicle grid ---------- */
+:root { --zone-s: #FFFFFF; --zone-m: #E3E8EE; --zone-l: #D3DAE3; --cell-on: #F3DCCD; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --zone-s: #202736; --zone-m: #1A202C; --zone-l: #141921; --cell-on: #3A2516; } }
+:root[data-theme="dark"] { --zone-s: #202736; --zone-m: #1A202C; --zone-l: #141921; --cell-on: #3A2516; }
+.vgrid-wrap { display: grid; grid-template-columns: minmax(0, 400px) minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 760px) { .vgrid-wrap { grid-template-columns: minmax(0, 1fr); } }
+.vgrid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 3px; padding: 3px; background: var(--ink); border-radius: 4px; }
+.cell { aspect-ratio: 1; border: 0; border-radius: 2px; position: relative; cursor: pointer; padding: 2px; display: grid; place-items: center; align-content: center; gap: 1px; font-size: 11px; line-height: 1.1; min-width: 0; overflow: hidden; }
+.cell.z-small { background: var(--zone-s); }
+.cell.z-medium { background: var(--zone-m); }
+.cell.z-large { background: var(--zone-l); }
+.cell:hover { outline: 2px solid var(--accent); outline-offset: -2px; }
+.cell.filled { background: var(--cell-on); box-shadow: inset 0 0 0 2px var(--accent); }
+.cell.core { background: var(--panel-2); box-shadow: inset 0 0 0 2px var(--ink); cursor: default; }
+.cell .cn { font-weight: 600; font-size: 12px; }
+.cell .cw { font-size: 10px; color: var(--muted); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cell .cf { position: absolute; top: 2px; right: 3px; font-family: var(--font-mono); font-size: 10px; color: var(--muted); }
+.vgrid-legend { display: flex; gap: 14px; margin-top: 8px; font-size: 12px; color: var(--muted); flex-wrap: wrap; }
+.lg { display: inline-block; width: 12px; height: 12px; border: 1px solid var(--line); vertical-align: -2px; margin-right: 5px; }
+.lg.z-small { background: var(--zone-s); } .lg.z-medium { background: var(--zone-m); } .lg.z-large { background: var(--zone-l); }
+.palette { display: grid; gap: 6px; max-height: 470px; overflow-y: auto; }
+.pal { text-align: left; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0 10px; padding: 7px 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--panel-2); cursor: pointer; }
+.pal .t { font-weight: 600; font-size: 14px; }
+.pal .num { font-size: 12px; color: var(--muted); }
+.pal .d { grid-column: 1 / -1; font-size: 12px; color: var(--muted); }
+.pal[aria-checked="true"] { border-color: var(--accent); box-shadow: inset 3px 0 0 var(--accent); background: var(--panel); }
+.citem.mount { grid-template-columns: minmax(0, 1fr) auto; }
+.citem.mount select { margin-top: 6px; }
+
+/* vehicle sheet */
+.vsheet-body { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 12px; align-items: start; }
+@media (max-width: 420px) { .vsheet-body { grid-template-columns: minmax(0, 1fr); } }
+.mgrid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 1px; background: var(--ink); border: 1px solid var(--ink); }
+.mcell { aspect-ratio: 1; font-size: 8px; display: grid; place-items: center; text-align: center; overflow: hidden; line-height: 1; }
+.mcell.z-small { background: var(--zone-s); } .mcell.z-medium { background: var(--zone-m); } .mcell.z-large { background: var(--zone-l); }
+.mcell.filled { background: var(--cell-on); font-weight: 600; }
+
+/* ---------- campaign ---------- */
+.rules-list { margin: 0; padding-left: 20px; display: grid; gap: 6px; font-size: 14px; }
+.camp-strip { display: flex; flex-wrap: wrap; gap: 12px; align-items: stretch; }
+.kpi { display: grid; gap: 4px; padding: 12px 14px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); min-width: 150px; align-content: start; }
+.kpi .k { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.kpi .v { font-size: 26px; font-weight: 500; line-height: 1.1; }
+.kpi .v small { font-size: 13px; color: var(--muted); }
+.kpi.end { margin-left: auto; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; background: none; border: 0; padding: 0; }
+.adj { display: flex; gap: 4px; flex-wrap: wrap; }
+.input.sm { padding: 3px 7px; font-size: 13px; width: auto; max-width: 140px; }
+input.input.sm[type="number"] { width: 70px; }
+.ccards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr)); gap: 12px; }
+.ccard { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.ccard.gone { opacity: .7; border-style: dashed; }
+.cc-h { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; gap: 10px; align-items: center; }
+.cc-h .av { width: 44px; height: 44px; font-size: 16px; }
+.cc-h .nm { font-weight: 600; overflow-wrap: anywhere; }
+.cpbal { display: grid; justify-items: center; line-height: 1; }
+.cpbal .num { font-size: 24px; font-weight: 500; color: var(--accent); }
+.cpbal .k { font-size: 11px; letter-spacing: .08em; color: var(--muted); }
+.cc-sec { display: grid; gap: 6px; border-top: 1px solid var(--line); padding-top: 8px; font-size: 14px; }
+.cc-sec > .k { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .08em; font-size: 13px; color: var(--muted); }
+.inj-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: start; }
+.conv { display: inline-flex; gap: 4px; }
+.rec { border-color: var(--accent); }
+.rec-table td { vertical-align: middle; }
+.rec-table input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent); }
+.rec-war { display: grid; gap: 8px; }
+.log { margin: 0; padding-left: 0; list-style: none; display: grid; gap: 6px; font-size: 14px; }
+.log li { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 8px; border-bottom: 1px dotted var(--line); padding-bottom: 5px; }
+
 @media print {
   .top, .tabs, .sheets-bar, .quote { display: none !important; }
+  .sheet { break-inside: avoid; }
   body { background: #fff; color: #000; padding: 0; }
   .sheets { grid-template-columns: 1fr 1fr; }
 }
@@ -281,6 +363,16 @@ const RULES = {
   minCharacters: 2,
   defaultLimit: 500,
   squadMin: 3, squadMax: 10,
+};
+// Campaign play, pp.53–59
+const CAMPAIGN = {
+  skillCP: 20,           // +1 skill
+  hpCP: 20, hpStep: 5,   // +5 hit-points
+  recruitCP: 10,         // new character base cost (waived when replacing a dead character)
+  healCP: 10,            // heal one injury (not death), after at least one game
+  cpPerCredit: 2,        // 2 campaign points -> 1 credit
+  vSkillCP: 20,          // vehicle +1 skill
+  vFixCP: 10,            // fix vehicle damage (not Destroyed)
 };
 
 const SKILLS = [
@@ -434,6 +526,83 @@ const ITEMS = [
   { id: "psyka", name: "Psyka", cost: 40, d: "Use a single arcane ability of your choice. After each use roll 1D10; lower than your total uses means addiction." },
 ];
 
+/* ---------- vehicles, pp.34–46 and 70–76 ---------- */
+const VEHICLE = { baseCost: 10, skillStart: 2, skillCost: 10, skillMax: 10, coreHP: 10 };
+const V_SIZES = {
+  small:  { name: "Small",  fight: 3, dmg: "1D6",    cover: "any part of the hull obscured" },
+  medium: { name: "Medium", fight: 5, dmg: "1D10",   cover: "more than 50% of the hull obscured" },
+  large:  { name: "Large",  fight: 7, dmg: "1D10+6", cover: "more than 75% of the hull obscured" },
+};
+const V_TYPES = [
+  { id: "ground", name: "Ground", cost: 0, speed: 15, effect: "Tracked, wheeled or screw driven. No modifiers to agility." },
+  { id: "walker", name: "Walker", cost: 20, speed: 20, effect: "+2 agility moving over rough ground and +1 over hazardous ground." },
+  { id: "hover", name: "Hover", cost: 30, speed: 15, effect: "Treats rough terrain as even. May spend an action to move over obstacles of 5cm or more without an agility roll." },
+  { id: "flyer", name: "Flyer", cost: 25, speed: 25, effect: "Ignores rough and hazardous terrain and moves up and down terrain freely. Must spend at least one action per turn moving or be destroyed, unless it spends an action to land." },
+];
+// Vehicle sections table, pp.71–72. hp = hit-points of the section.
+const SECTIONS = [
+  { id: "engine", name: "Engine", short: "Engine", cost: 0, hp: 10, core: true, d: "Core section. Cannot be removed." },
+  { id: "crew-core", name: "Crew (core)", short: "Crew", cost: 0, hp: 10, core: true, crew: true, d: "Core section. Each crew section lets the vehicle fire one weapon per shooting action." },
+  { id: "armour", name: "Armour plating", short: "Armour", cost: 15, hp: 15, d: "Absorbs damage. No more than 50% of a small or medium vehicle, or 25% of a large vehicle, may be armour plating." },
+  { id: "crew", name: "Crew", short: "Crew", cost: 10, hp: 10, crew: true, d: "For each crew section the vehicle may fire one weapon in a shooting action." },
+  { id: "dozer", name: "Dozer blade", short: "Dozer", cost: 20, hp: 15, d: "+1 agility through hazardous terrain. Enemies charging from the front suffer -1 fighting. Front facing only, medium or large vehicles only." },
+  { id: "hardpoint", name: "Hard point", short: "Hardpt", cost: 5, hp: 10, mount: true, d: "Mounts one weapon, which fires from this section's facing." },
+  { id: "radio", name: "Radio", short: "Radio", cost: 10, hp: 5, d: "Friendly characters and vehicles within 10cm add 1 to their agility when determining turn order." },
+  { id: "scrambler", name: "Scrambler array", short: "Scram", cost: 10, hp: 5, d: "Enemies within 10cm suffer -1 agility when determining turn order." },
+  { id: "smoke", name: "Smoke launchers", short: "Smoke", cost: 8, hp: 5, d: "Spend an action to launch smoke: enemies 10cm or further away suffer -1 shooting against this vehicle for the rest of the turn." },
+  { id: "transport", name: "Transport section", short: "Trans", cost: 18, hp: 10, d: "Carries 3 characters, who embark and disembark through this section's facing. If destroyed, embarked characters disembark and take 1D10 damage." },
+  { id: "turret", name: "Turret hard point", short: "Turret", cost: 20, hp: 10, mount: true, turret: true, d: "Mounts one weapon that can fire in any direction regardless of facing." },
+];
+// Vehicle traits & abilities, p.73
+const V_TRAITS = [
+  ["Camo", 27, "This vehicle counts as being in cover when targeted by shooters more than 30cm away."],
+  ["Hardened crew", 25, "For every crew section this vehicle has, it receives -1 to its dice rolls when making break tests."],
+  ["Loopholes", 20, "Characters embarked within this vehicle may fire their weapons at targets within the facing they are embarked in during the vehicle's shooting actions."],
+  ["Mercenary", 17, "This vehicle may replace its core crew section with any other section. It can only act when a character with the Pilot trait is embarked."],
+  ["Open-topped", -20, "When hit, the shooter may decide which section of this vehicle is damaged, instead of the vehicle's owner."],
+  ["Ramshackle", -30, "This vehicle is considered derelict immediately upon failing a break test."],
+].map(([name, cost, effect]) => ({ name, cost, effect }));
+const V_ABILITIES = [
+  ["Repair", 20, "Once per turn this vehicle may attempt to repair one of its sections. Roll 1D8 and add it to the hit-points of a damaged section, up to its starting hit-points."],
+  ["Turbo boost", 15, "Roll 1D10. On a 2-10, add the result in cm to your next movement action. On a 1 this vehicle has stalled and may not move for the rest of the turn."],
+].map(([name, cost, effect]) => ({ name, cost, effect }));
+// Vehicle weapons table, p.76. Bought with points. Vehicles may also mount any ranged character weapon.
+const V_WEAPONS = [
+  { id: "battle-cannon", name: "Battle cannon", type: "Ranged, Ballistic", hands: 2, dmg: "1D12+6", rules: ["Explosive"], range: 60, cost: 80, vehicle: true },
+  { id: "mortar", name: "Mortar", type: "Ranged, Ballistic", hands: 2, dmg: "3D8", rules: ["Indirect"], range: 60, rangeText: "30-60cm", cost: 50, vehicle: true },
+  { id: "sonic-cannon", name: "Sonic cannon", type: "Ranged, Energy", hands: 2, dmg: "1D8*", rules: ["Cumulative"], range: 50, cost: 80, vehicle: true },
+  { id: "heavy-mg", name: "Heavy machine gun", type: "Ranged, Ballistic", hands: 2, dmg: "6D6", rules: [], range: 40, cost: 65, vehicle: true },
+  { id: "flame-cannon", name: "Flame cannon", type: "Ranged", hands: 2, dmg: "3D6", rules: ["Poisonous"], range: 20, cost: 55, vehicle: true },
+];
+
+/* ---------- campaign tables, pp.80–82 ---------- */
+const INJURIES = [
+  { n: 1, name: "Complete recovery", effect: "Makes a swift recovery and may fight as normal in the next game." },
+  { n: 2, name: "Out of action", effect: "Alive but bloodied. Takes no part in the next game." },
+  { n: 3, name: "Shaken", effect: "Traumatised. Suffers -1 (P) when making break tests in all future games." },
+  { n: 4, name: "Life long wounds", effect: "Hit-points permanently reduced by 25%." },
+  { n: 5, name: "Shattered hand", effect: "May only use a single 1 handed weapon for 1D4 games." },
+  { n: 6, name: "Crushed leg", effect: "-1D4 agility for 1D4 games and a permanent -3cm speed." },
+  { n: 7, name: "Brain damage", effect: "A permanent -2 to (AW) and (P)." },
+  { n: 8, name: "Death", effect: "They're dead, just dead. Divide their possessions amongst the warband and look for a replacement." },
+];
+const V_DAMAGE = [
+  { n: 1, name: "Grinding gears", effect: "Suffers -1D4 agility and moves at half speed." },
+  { n: 2, name: "Short on crew", effect: "Loses all but 1 of its crew sections." },
+  { n: 3, name: "Badly repaired", effect: "Gains the Ramshackle trait. This does not lower its points cost." },
+  { n: 4, name: "Slow repairs", effect: "Misses the next game, then returns at full hit-points." },
+  { n: 5, name: "Fully repaired", effect: "Fixed up without any problems. Starts the next game at full hit-points." },
+  { n: 6, name: "Destroyed", effect: "Too badly damaged to keep going. 50% of its starting points cost may be used to build a new vehicle. Its campaign points are lost." },
+];
+const AGENDAS = [
+  { n: 1, name: "Vendetta", effect: "After deployment, select an enemy character. You must kill them before the game ends." },
+  { n: 2, name: "The mule", effect: "Reach the opposite board edge from where you started and spend an entire turn in base contact with it." },
+  { n: 3, name: "Thief in the night", effect: "Visit each corner of the table and roll 1D4 for treasure; on a 4 you find it and gain 2D20 credits." },
+  { n: 4, name: "Knowledge is power", effect: "Select an enemy character at the start. Win at least one fight action against them to extract information instead of dealing damage." },
+  { n: 5, name: "Vow of pacifism", effect: "Survive to the end of the game without causing any damage to an enemy character." },
+  { n: 6, name: "An honourable death", effect: "Fight and be slain by the enemy character with the highest (F). Campaign points from this agenda go to the whole warband." },
+];
+
 // Flavour from the book
 const QUOTES = [
   ["Oh, this? Picked this up from a mad, blind, one-handed gunsmith on a pirate cruiser somewhere out beyond the Deaths-head nebula. Honestly, I have no idea what it does - last time I fired it I woke up 2 days later, no clothes, surrounded by burnt corpses and about 300 frogs.", "Custom weapons"],
@@ -443,6 +612,10 @@ const QUOTES = [
   ["The factory world of Lychester VII. After several weeks pursuing each other through the capital city's ancient sewers, two rival gangs finally run into each other.", "Scenarios"],
   ["Your character will need some hardware if they plan on surviving for any length of time out in the wilds of deep space.", "Equipment"],
   ["Credits and points may seem the same, but there may be times when your warband earns one and not the other, and you never know when you might run out of cash!", "Equipment"],
+  ["Spiked tracks, hydraulic legs, high speed anti-grav motors… there's no end to the variety of death machines to be found across the galaxy.", "Vehicles"],
+  ["Or an ancient camper-van, rigged up with less than legal anti-grav engines, from which a touring gang of mutant musicians host their impromptu concerts in an act of sonic terrorism?", "Creating vehicles"],
+  ["Forces of the rogue warlord Julys Kezyr bring the full might of their antique landships to bear against the defenders of Avaricum during the fall of new Gaul.", ""],
+  ["Isn't it always the way? You agree to an easy security job on a nice quiet galactic shipping lane, and before you know it you've found yourself inducted into a secret society dedicated to eradicating an ancient space god.", "Campaigns"],
 ];
 
 /* =====================================================================
@@ -452,11 +625,17 @@ const $ = (s, el = document) => el.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const uid = () => Math.random().toString(36).slice(2, 9);
 const sgn = n => (n > 0 ? "+" : n < 0 ? "−" : "") + Math.abs(n);
+const clone = o => JSON.parse(JSON.stringify(o));
+const roll = n => 1 + Math.floor(Math.random() * n);
 const TRAIT = Object.fromEntries(TRAITS.map(t => [t.name, t]));
 const ABIL = Object.fromEntries(ABILITIES.map(a => [a.name, a]));
 const SPEC = Object.fromEntries(SPECIALS.map(s => [s.name, s]));
 const ARM = Object.fromEntries(ARMOUR.map(a => [a.id, a]));
 const ITEM = Object.fromEntries(ITEMS.map(i => [i.id, i]));
+const VTYPE = Object.fromEntries(V_TYPES.map(t => [t.id, t]));
+const SECT = Object.fromEntries(SECTIONS.map(s => [s.id, s]));
+const VTRAIT = Object.fromEntries(V_TRAITS.map(t => [t.name, t]));
+const VABIL = Object.fromEntries(V_ABILITIES.map(a => [a.name, a]));
 
 // Max potential damage of a dice expression, e.g. "2D10+4" -> 24, "1D4-1" -> 3
 function maxDamage(expr) {
@@ -478,13 +657,17 @@ function maxDamage(expr) {
    ===================================================================== */
 const STORE_KEY = "p28-builder-v1";
 let db = { current: null, warbands: {} };
-let ui = { tab: "build", sel: null, traitFilter: "", traitMode: "all", abilFilter: "", weapFilter: "", weapMode: "all", confirm: null, quote: 0, cw: null };
+let ui = { tab: "build", sel: null, traitFilter: "", traitMode: "all", weapFilter: "", weapMode: "all", confirm: null, quote: 0, cw: null, brush: "armour", rec: null };
 
 function newCharacter(name = "New recruit") {
   return { id: uid(), name, background: "", skills: { A: 1, S: 1, F: 1, P: 1, AW: 1 }, hp: 20, traits: [], abilities: [], weapons: [], armour: "none", items: {}, squad: false, size: 3, photo: null };
 }
+function newVehicle(name = "New vehicle") {
+  return { id: uid(), kind: "vehicle", name, background: "", photo: null, skills: { A: 2, S: 2 }, type: "ground",
+    cells: { "2-2": "engine", "2-3": "crew-core" }, mounts: {}, traits: [], abilities: [] };
+}
 function newWarband(name = "Unnamed warband") {
-  return { id: uid(), name, limit: RULES.defaultLimit, characters: [], customWeapons: [], updated: Date.now() };
+  return { id: uid(), name, limit: RULES.defaultLimit, characters: [], vehicles: [], customWeapons: [], campaign: null, updated: Date.now() };
 }
 function exampleWarband() {
   const w = newWarband("Lychester Sewer Rats (example)");
@@ -502,19 +685,27 @@ function exampleWarband() {
   w.characters = [a, b, c];
   return w;
 }
+function migrate(w) {
+  w.vehicles = w.vehicles || [];
+  w.customWeapons = w.customWeapons || [];
+  if (w.campaign === undefined) w.campaign = null;
+  w.characters.forEach(c => { c.items = c.items || {}; c.weapons = c.weapons || []; c.traits = c.traits || []; c.abilities = c.abilities || []; if (c.photo === undefined) c.photo = null; });
+  w.vehicles.forEach(v => { v.kind = "vehicle"; v.cells = v.cells || { "2-2": "engine", "2-3": "crew-core" }; v.mounts = v.mounts || {}; v.traits = v.traits || []; v.abilities = v.abilities || []; });
+  return w;
+}
 
 function load() {
   try {
     const raw = localStorage.getItem(STORE_KEY);
     if (raw) { const d = JSON.parse(raw); if (d && d.warbands) db = d; }
   } catch (e) { /* storage unavailable */ }
+  Object.values(db.warbands).forEach(migrate);
   if (!db.current || !db.warbands[db.current]) {
     const ids = Object.keys(db.warbands);
     if (ids.length) db.current = ids[0];
-    else { const w = exampleWarband(); db.warbands[w.id] = w; db.current = w.id; }
+    else { const w = exampleWarband(); migrate(w); db.warbands[w.id] = w; db.current = w.id; }
   }
-  const w = wb();
-  ui.sel = w.characters[0]?.id ?? null;
+  ui.sel = firstUnit()?.id ?? null;
   ui.quote = Math.floor(Math.random() * QUOTES.length);
 }
 function save() {
@@ -522,9 +713,22 @@ function save() {
   try { localStorage.setItem(STORE_KEY, JSON.stringify(db)); return true; } catch (e) { return false; }
 }
 const wb = () => db.warbands[db.current];
-function avatar(c, cls = "") {
-  const initials = (c.name || "?").trim().split(/\s+/).slice(0, 2).map(x => x[0]).join("") || "?";
-  return `<div class="av ${cls}">${c.photo ? `<img src="${c.photo}" alt="${esc(c.name)}">` : esc(initials)}</div>`;
+const camp = () => wb()?.campaign;
+const isV = u => u?.kind === "vehicle";
+const allUnits = (w = wb()) => [...w.characters, ...w.vehicles];
+const unitById = (id, w = wb()) => allUnits(w).find(u => u.id === id);
+const firstUnit = (w = wb()) => allUnits(w)[0];
+const sel = () => unitById(ui.sel);
+const ch = () => { const u = sel(); return u && !isV(u) ? u : null; };
+const veh = () => { const u = sel(); return isV(u) ? u : null; };
+const gone = u => u.status === "dead" || u.status === "destroyed";
+
+function weaponById(id, w = wb()) {
+  return WEAPONS.find(x => x.id === id) || V_WEAPONS.find(x => x.id === id) || (w?.customWeapons || []).find(x => x.id === id);
+}
+function avatar(u, cls = "") {
+  const initials = (u.name || "?").trim().split(/\s+/).slice(0, 2).map(x => x[0]).join("") || "?";
+  return `<div class="av ${cls}">${u.photo ? `<img src="${u.photo}" alt="${esc(u.name)}">` : esc(initials)}</div>`;
 }
 // Shrink a picked image to a 320px centre-cropped square JPEG so it fits in browser storage
 function shrinkImage(file) {
@@ -543,24 +747,19 @@ function shrinkImage(file) {
   });
 }
 async function setPhoto(file) {
-  const c = ch();
-  if (!c || !file) return;
+  const u = sel();
+  if (!u || !file) return;
   if (!/^image\//.test(file.type)) { toast("That file isn't a picture"); return; }
   try {
-    const before = c.photo;
-    c.photo = await shrinkImage(file);
-    if (!save()) { c.photo = before; toast("Browser storage is full. Remove some photos or old warbands."); return; }
+    const before = u.photo;
+    u.photo = await shrinkImage(file);
+    if (!save()) { u.photo = before; toast("Browser storage is full. Remove some photos or old warbands."); return; }
     render(); toast("Photo added");
   } catch (e) { toast("Couldn't read that picture"); }
 }
-const ch = () => wb()?.characters.find(c => c.id === ui.sel);
-
-function weaponById(id, w = wb()) {
-  return WEAPONS.find(x => x.id === id) || (w?.customWeapons || []).find(x => x.id === id);
-}
 
 /* =====================================================================
-   COSTS & CHECKS
+   CHARACTER COSTS & CHECKS
    ===================================================================== */
 function costParts(c, w = wb()) {
   const skills = SKILLS.reduce((s, k) => s + (c.skills[k.k] - 1) * RULES.skillCost, 0);
@@ -574,9 +773,9 @@ function costParts(c, w = wb()) {
   const models = c.squad ? c.size : 1;
   return { base: RULES.baseCost, skills, hp, traits, abilities, weapons, armour, items, equipment: weapons + armour + items, each, models, total: each * models };
 }
-const charCost = c => costParts(c).total;
-function wbTotal(w = wb()) { return w.characters.reduce((s, c) => s + costParts(c, w).total, 0); }
-function modelCount(w = wb()) { return w.characters.reduce((s, c) => s + (c.squad ? c.size : 1), 0); }
+const unitCost = u => isV(u) ? vCost(u).total : costParts(u).total;
+function wbTotal(w = wb()) { return allUnits(w).filter(u => !gone(u)).reduce((s, u) => s + (isV(u) ? vCost(u, w).total : costParts(u, w).total), 0); }
+function modelCount(w = wb()) { return w.characters.filter(c => !gone(c)).reduce((s, c) => s + (c.squad ? c.size : 1), 0); }
 
 function speedOf(c) {
   let s = RULES.speed; const notes = [];
@@ -584,6 +783,19 @@ function speedOf(c) {
   if (c.traits.includes("Fast")) notes.push("+1D6");
   if (c.traits.includes("Slow")) notes.push("−1D6");
   return { s, notes };
+}
+// Profile after campaign injuries
+function effective(c) {
+  const sk = { ...c.skills }; let hp = c.hp; let sp = speedOf(c).s; const notes = [];
+  (c.injuries || []).forEach(i => {
+    if (i.n === 4) hp = Math.max(1, Math.floor(hp * 0.75));
+    if (i.n === 6) { sp -= 3; if (i.dur > 0) { sk.A = Math.max(1, sk.A - (i.pen || 0)); notes.push(`−${i.pen} A for ${i.dur} more game${i.dur > 1 ? "s" : ""}`); } }
+    if (i.n === 7) { sk.AW = Math.max(1, sk.AW - 2); sk.P = Math.max(1, sk.P - 2); }
+    if (i.n === 5 && i.dur > 0) notes.push(`one 1-handed weapon only for ${i.dur} more game${i.dur > 1 ? "s" : ""}`);
+    if (i.n === 3) notes.push("−1 (P) on break tests");
+  });
+  const changed = hp !== c.hp || sp !== speedOf(c).s || SKILLS.some(s => sk[s.k] !== c.skills[s.k]);
+  return { skills: sk, hp, speed: sp, notes, changed };
 }
 function handsAvailable(c) {
   if (c.traits.includes("Armless")) return 1;
@@ -608,43 +820,226 @@ function charChecks(c) {
   }
   if (t("Psychic") && !t("Minor arcana") && !t("Major arcana")) out.push(["warn", "Psychic rerolls failed arcana, but this character has no Minor or Major arcana."]);
   if (t("Minor arcana") && t("Major arcana")) out.push(["warn", "Minor and Major arcana both taken. Major already rolls 3 abilities."]);
-  // hands
   const hands = c.weapons.reduce((s, x) => s + (weaponById(x.id)?.hands || 1) * x.qty, 0);
   const av = handsAvailable(c);
   if (hands > av) out.push(["info", `Carrying ${hands} hands' worth of weapons with ${av} hand${av > 1 ? "s" : ""}. Swapping weapons takes an action.`]);
-  // ammo
   const need = {};
   c.weapons.forEach(x => { const w = weaponById(x.id); if (w?.rules?.includes("Reload")) need[w.ammo || "any"] = w.name; });
   for (const [kind, wname] of Object.entries(need)) {
     if (kind === "any") { if (!["ammo-rough", "ammo-basic", "ammo-special"].some(i => c.items[i])) out.push(["warn", `${wname} has Reload but the character carries no ammo.`]); }
     else if (!c.items["ammo-" + kind]) out.push(["warn", `${wname} needs ${kind} ammo to reload, and the character carries none.`]);
   }
-  if (c.hp < RULES.hpStart && c.hp <= 10) out.push(["info", `Only ${c.hp} hit-points. Skills drop by 1 once they lose half.`]);
+  if (c.hp <= 10) out.push(["info", `Only ${c.hp} hit-points. Skills drop by 1 once they lose half.`]);
   if (c.squad && (c.size < RULES.squadMin || c.size > RULES.squadMax)) out.push(["bad", `Squads must have ${RULES.squadMin} to ${RULES.squadMax} members.`]);
   return out;
 }
+
+/* =====================================================================
+   VEHICLES
+   Building grid: 7 rows × 6 columns, as on the vehicle character sheet (p.84).
+   Small zone = rows 2–4, cols 2–3. Medium = rows 1–5, cols 1–4. Large = all.
+   ===================================================================== */
+const GRID_R = 7, GRID_C = 6;
+const ZONES = { small: [2, 4, 2, 3], medium: [1, 5, 1, 4], large: [0, 6, 0, 5] };
+function zoneOf(r, c) {
+  const inZ = ([r0, r1, c0, c1]) => r >= r0 && r <= r1 && c >= c0 && c <= c1;
+  return inZ(ZONES.small) ? "small" : inZ(ZONES.medium) ? "medium" : "large";
+}
+const ORDER = { small: 0, medium: 1, large: 2 };
+function vSize(v) {
+  let s = "small";
+  Object.keys(v.cells).forEach(k => { const [r, c] = k.split("-").map(Number); const z = zoneOf(r, c); if (ORDER[z] > ORDER[s]) s = z; });
+  return s;
+}
+// Facing from the X laid over the vehicle (p.37), using the bounding box of the vehicle's size on the grid
+function facingOf(r, c, size) {
+  if (size === "small") return null;
+  const [r0, r1, c0, c1] = ZONES[size];
+  const cy = (r0 + r1 + 1) / 2, cx = (c0 + c1 + 1) / 2, hy = (r1 + 1 - r0) / 2, hx = (c1 + 1 - c0) / 2;
+  const dy = (r + 0.5 - cy) / hy, dx = (c + 0.5 - cx) / hx;
+  if (Math.abs(dy) >= Math.abs(dx)) return dy < 0 ? "Front" : "Rear";
+  return dx < 0 ? "Left" : "Right";
+}
+function vSections(v) { return Object.entries(v.cells).map(([k, id]) => ({ k, id, s: SECT[id] })).filter(x => x.s); }
+function vCost(v, w = wb()) {
+  const skills = (v.skills.A - VEHICLE.skillStart + v.skills.S - VEHICLE.skillStart) * VEHICLE.skillCost;
+  const type = VTYPE[v.type]?.cost || 0;
+  const sections = vSections(v).reduce((s, x) => s + x.s.cost, 0);
+  const traits = v.traits.reduce((s, n) => s + (VTRAIT[n]?.cost || 0), 0);
+  const abilities = v.abilities.reduce((s, n) => s + (VABIL[n]?.cost || 0), 0);
+  const weapons = Object.entries(v.mounts).reduce((s, [k, id]) => s + (v.cells[k] && SECT[v.cells[k]]?.mount ? (weaponById(id, w)?.cost || 0) : 0), 0);
+  const total = VEHICLE.baseCost + skills + type + sections + traits + abilities + weapons;
+  return { base: VEHICLE.baseCost, skills, type, sections, traits, abilities, weapons, total };
+}
+function vStats(v) {
+  const secs = vSections(v);
+  const size = vSize(v);
+  const hp = secs.reduce((s, x) => s + x.s.hp, 0);
+  const crew = secs.filter(x => x.s.crew).length;
+  const mounts = secs.filter(x => x.s.mount);
+  const transport = secs.filter(x => x.id === "transport").length * 3;
+  let speed = VTYPE[v.type].speed;
+  return { size, hp, sections: secs.length, crew, mounts, transport, speed, fight: V_SIZES[size].fight, dmg: V_SIZES[size].dmg };
+}
+function vChecks(v) {
+  const out = []; const st = vStats(v); const secs = vSections(v);
+  const armour = secs.filter(x => x.id === "armour").length;
+  const cap = st.size === "large" ? 0.25 : 0.5;
+  if (armour > Math.floor(st.sections * cap)) out.push(["bad", `Too much armour plating: ${armour} of ${st.sections} sections. A ${st.size} vehicle may have at most ${Math.round(cap * 100)}% (${Math.floor(st.sections * cap)}).`]);
+  secs.filter(x => x.id === "dozer").forEach(x => {
+    const [r, c] = x.k.split("-").map(Number);
+    if (st.size === "small") out.push(["bad", "Dozer blades may only be used on medium or large vehicles."]);
+    else if (facingOf(r, c, st.size) !== "Front") out.push(["bad", "A dozer blade must be placed in the vehicle's front facing."]);
+  });
+  if (!st.crew) out.push(["warn", "No crew sections left, so this vehicle can't fire any weapons."]);
+  const armed = st.mounts.filter(m => v.mounts[m.k]).length;
+  if (st.mounts.length > armed) out.push(["info", `${st.mounts.length - armed} hard point${st.mounts.length - armed > 1 ? "s have" : " has"} no weapon mounted.`]);
+  if (armed > st.crew && st.crew) out.push(["info", `${armed} weapons but ${st.crew} crew, so it fires ${st.crew} per shooting action.`]);
+  if (v.traits.includes("Mercenary")) out.push(["info", "Mercenary vehicles can only act while a character with the Pilot trait is embarked."]);
+  if (v.type === "flyer") out.push(["info", "Flyers must spend at least one action moving each turn, or land first."]);
+  if (st.size !== "small") out.push(["info", `${V_SIZES[st.size].name} vehicles have facings. Damage from an attack goes to a section on the facing it came from.`]);
+  return out;
+}
+
 function wbChecks(w = wb()) {
   const out = [];
-  const total = wbTotal(w);
-  const models = modelCount(w);
+  const total = wbTotal(w), models = modelCount(w);
   if (models < RULES.minCharacters) out.push(["bad", `A warband needs at least ${RULES.minCharacters} characters (has ${models}).`]);
-  if (total > w.limit) out.push(["bad", `${total - w.limit} points over the ${w.limit} point limit.`]);
-  w.characters.forEach(c => charChecks(c).filter(x => x[0] === "bad").forEach(x => out.push(["bad", `${c.name || "Unnamed"}: ${x[1]}`])));
-  if (!out.length) out.push(["ok", "Warband is legal and ready to deploy."]);
+  if (!w.campaign && total > w.limit) out.push(["bad", `${total - w.limit} points over the ${w.limit} point limit.`]);
+  w.characters.filter(c => !gone(c)).forEach(c => charChecks(c).filter(x => x[0] === "bad").forEach(x => out.push(["bad", `${c.name || "Unnamed"}: ${x[1]}`])));
+  w.vehicles.filter(v => !gone(v)).forEach(v => vChecks(v).filter(x => x[0] === "bad").forEach(x => out.push(["bad", `${v.name || "Unnamed"}: ${x[1]}`])));
+  if (!out.length) out.push(["ok", w.campaign ? `Campaign under way · game ${w.campaign.games + 1} next.` : "Warband is legal and ready to deploy."]);
   return out;
+}
+
+/* =====================================================================
+   CAMPAIGN: pending changes are paid in campaign points (CP) and credits
+   ===================================================================== */
+const charBuild = c => clone({ skills: c.skills, hp: c.hp, traits: c.traits, abilities: c.abilities, weapons: c.weapons, armour: c.armour, items: c.items });
+const vehBuild = v => clone({ skills: v.skills, type: v.type, cells: v.cells, mounts: v.mounts, traits: v.traits, abilities: v.abilities });
+const buildOf = u => isV(u) ? vehBuild(u) : charBuild(u);
+
+function pending(u, w = wb()) {
+  const cp = w.campaign; if (!cp || gone(u)) return null;
+  const lines = []; let points = 0, credits = 0;
+  if (u.draft) {
+    if (isV(u)) {
+      const k = vCost(u, w).total; points = k; lines.push(`New vehicle, ${k} pts`);
+      return { points, credits, lines, pool: true, changed: true };
+    }
+    const p = costParts(u, w);
+    const base = u.waived ? 0 : CAMPAIGN.recruitCP;
+    points = base + p.skills + p.hp + p.traits + p.abilities; credits = p.equipment;
+    lines.push(u.waived ? "Replacement recruit (no 10 CP fee)" : `Recruit fee ${base} CP`);
+    if (p.skills) lines.push(`Skills ${p.skills}`); if (p.hp) lines.push(`Hit-points ${p.hp}`);
+    if (p.traits) lines.push(`Traits ${p.traits}`); if (p.abilities) lines.push(`Abilities ${p.abilities}`);
+    if (credits) lines.push(`Equipment ${credits} cr`);
+    if (u.squad) { points *= u.size; credits *= u.size; lines.push(`× ${u.size} members`); }
+    return { points: Math.max(0, points), credits, lines, pool: true, changed: true };
+  }
+  const s = u.snap; if (!s) return null;
+  const changed = JSON.stringify(buildOf(u)) !== JSON.stringify(s);
+  if (!changed) return null;
+  const traitTable = isV(u) ? VTRAIT : TRAIT, abilTable = isV(u) ? VABIL : ABIL;
+  const skillList = isV(u) ? [{ k: "A", name: "Agility" }, { k: "S", name: "Shooting" }] : SKILLS;
+  const perSkill = isV(u) ? CAMPAIGN.vSkillCP : CAMPAIGN.skillCP;
+  skillList.forEach(k => { const d = u.skills[k.k] - s.skills[k.k]; if (d > 0) { points += d * perSkill; lines.push(`+${d} ${k.name} (${d * perSkill} CP)`); } });
+  u.traits.filter(t => !s.traits.includes(t)).forEach(t => { const c = Math.max(0, traitTable[t]?.cost || 0); points += c; lines.push(`${t} (${c} CP)`); });
+  s.traits.filter(t => !u.traits.includes(t)).forEach(t => { const c = traitTable[t]?.cost || 0; if (c < 0) { points += -c; lines.push(`Lose ${t} (${-c} CP)`); } else lines.push(`Drop ${t} (no refund)`); });
+  u.abilities.filter(a => !s.abilities.includes(a)).forEach(a => { const c = abilTable[a]?.cost || 0; points += c; lines.push(`${a} (${c} CP)`); });
+  if (isV(u)) {
+    if (u.type !== s.type && VTYPE[u.type].cost) { points += VTYPE[u.type].cost; lines.push(`${VTYPE[u.type].name} type (${VTYPE[u.type].cost} CP)`); }
+    const count = cells => Object.values(cells).reduce((m, id) => (m[id] = (m[id] || 0) + 1, m), {});
+    const now = count(u.cells), was = count(s.cells);
+    Object.entries(now).forEach(([id, n]) => { const d = n - (was[id] || 0); if (d > 0 && SECT[id].cost) { points += d * SECT[id].cost; lines.push(`${d}× ${SECT[id].name} (${d * SECT[id].cost} CP)`); } });
+    Object.entries(u.mounts).forEach(([k, id]) => { if (s.mounts[k] !== id && u.cells[k] && SECT[u.cells[k]]?.mount) { const wp = weaponById(id, w); if (wp) { points += wp.cost; lines.push(`${wp.name} (${wp.cost} CP)`); } } });
+  } else {
+    const d = u.hp - s.hp; if (d > 0) { const n = Math.ceil(d / CAMPAIGN.hpStep); points += n * CAMPAIGN.hpCP; lines.push(`+${d} hit-points (${n * CAMPAIGN.hpCP} CP)`); }
+    const qty = list => list.reduce((m, x) => (m[x.id] = (m[x.id] || 0) + x.qty, m), {});
+    const nw = qty(u.weapons), ow = qty(s.weapons);
+    Object.entries(nw).forEach(([id, q]) => { const d = q - (ow[id] || 0); const wp = weaponById(id, w); if (d > 0 && wp) { credits += d * wp.cost; lines.push(`${d}× ${wp.name} (${d * wp.cost} cr)`); } });
+    if (u.armour !== s.armour && ARM[u.armour].cost) { credits += ARM[u.armour].cost; lines.push(`${ARM[u.armour].name} (${ARM[u.armour].cost} cr)`); }
+    Object.entries(u.items).forEach(([id, q]) => { const d = q - (s.items[id] || 0); if (d > 0) { credits += d * ITEM[id].cost; lines.push(`${d}× ${ITEM[id].name} (${d * ITEM[id].cost} cr)`); } });
+    if (u.squad && credits) { credits *= u.size; lines.push(`Equipment × ${u.size} members`); }
+  }
+  if (!lines.length) lines.push("Removed things (no refund)");
+  return { points, credits, lines, pool: false, changed: true };
+}
+function payPending(u) {
+  const w = wb(), cp = w.campaign, p = pending(u); if (!p) return;
+  let fromSalvage = 0;
+  if (p.pool) {
+    if (isV(u)) fromSalvage = Math.min(cp.salvage || 0, p.points);
+    if (cp.pool + fromSalvage < p.points) { toast(`The warband pool has ${cp.pool} CP${fromSalvage ? ` (+${fromSalvage} salvage)` : ""}; this needs ${p.points}.`); return; }
+  } else if ((u.cp || 0) < p.points) { toast(`${u.name} has ${u.cp || 0} CP; this needs ${p.points}.`); return; }
+  if (cp.credits < p.credits) { toast(`The warband has ${cp.credits} credits; this needs ${p.credits}.`); return; }
+  if (p.pool) { cp.salvage = (cp.salvage || 0) - fromSalvage; cp.pool -= p.points - fromSalvage; } else u.cp -= p.points;
+  cp.credits -= p.credits;
+  logLine(`${u.name}: ${u.draft ? "joined the warband" : "upgraded"}: ${p.lines.join(", ")}.`);
+  u.draft = false; u.waived = false; u.snap = buildOf(u); u.cp = u.cp || 0;
+  toast("Paid and confirmed");
+}
+function undoPending(u) {
+  const w = wb();
+  if (u.draft) {
+    const list = isV(u) ? w.vehicles : w.characters; list.splice(list.indexOf(u), 1);
+    ui.sel = firstUnit()?.id ?? null; toast(isV(u) ? "Vehicle discarded" : "Recruit discarded"); return;
+  }
+  Object.assign(u, clone(u.snap)); toast("Changes undone");
+}
+function logLine(text) { const cp = camp(); if (cp) cp.log.unshift({ game: cp.games, text }); }
+function startCampaign() {
+  const w = wb(), total = wbTotal(w);
+  w.campaign = { games: 0, credits: Math.max(0, w.limit - total), pool: 0, salvage: 0, log: [] };
+  allUnits(w).forEach(u => { u.snap = buildOf(u); u.cp = 0; u.injuries = []; u.damage = []; u.agenda = null; u.status = "active"; u.draft = false; u.outNext = false; u.pendingRoll = false; });
+  logLine(`Campaign started with ${w.campaign.credits} credits left over from ${w.limit} points.`);
+}
+function endCampaign() {
+  const w = wb();
+  w.characters = w.characters.filter(c => !c.draft); w.vehicles = w.vehicles.filter(v => !v.draft);
+  allUnits(w).forEach(u => { delete u.snap; delete u.cp; delete u.injuries; delete u.damage; delete u.agenda; delete u.status; delete u.draft; delete u.waived; delete u.outNext; delete u.pendingRoll; });
+  w.campaign = null;
+}
+const agendaWorth = a => Math.max(0, 5 - (a?.fails || 0));
+function applyInjury(c, n) {
+  const cp = camp(), inj = INJURIES[n - 1];
+  const entry = { id: uid(), n, name: inj.name, game: cp.games };
+  if (c.traits.includes("Painless") && n !== 8) { logLine(`${c.name} rolled ${inj.name} but is Painless: complete recovery.`); c.pendingRoll = false; return; }
+  if (n === 8 && c.traits.includes("Death-proof")) { logLine(`${c.name} rolled Death but is Death-proof: complete recovery.`); c.pendingRoll = false; return; }
+  if (n === 1) { logLine(`${c.name}: complete recovery.`); c.pendingRoll = false; return; }
+  if (n === 2) c.outNext = true;
+  if (n === 5) entry.dur = roll(4);
+  if (n === 6) { entry.dur = roll(4); entry.pen = roll(4); }
+  if (n === 8) { c.status = "dead"; logLine(`${c.name} is dead.`); c.pendingRoll = false; return; }
+  c.injuries = c.injuries || []; c.injuries.push(entry);
+  logLine(`${c.name}: ${inj.name}${entry.dur ? ` (${entry.dur} game${entry.dur > 1 ? "s" : ""}${entry.pen ? `, −${entry.pen} A` : ""})` : ""}.`);
+  c.pendingRoll = false;
+}
+function applyVDamage(v, n) {
+  const cp = camp(), d = V_DAMAGE[n - 1];
+  v.pendingRoll = false;
+  if (n === 5) { logLine(`${v.name}: fully repaired.`); return; }
+  if (n === 6) {
+    const salvage = Math.floor(vCost(v).total / 2);
+    v.status = "destroyed"; v.cp = 0; cp.salvage = (cp.salvage || 0) + salvage;
+    logLine(`${v.name} is destroyed. ${salvage} pts of salvage toward a new vehicle.`); return;
+  }
+  if (n === 4) v.outNext = true;
+  v.damage = v.damage || []; v.damage.push({ id: uid(), n, name: d.name, game: cp.games });
+  logLine(`${v.name}: ${d.name}.`);
 }
 
 /* =====================================================================
    RENDER
    ===================================================================== */
 function render() {
-  // keep scroll positions of inner lists
   const keep = {};
   document.querySelectorAll("[data-scroll]").forEach(el => keep[el.dataset.scroll] = el.scrollTop);
   renderMeter(); renderQuote(); renderTabs();
   const app = $("#app");
   if (ui.tab === "build") app.innerHTML = viewBuild();
   else if (ui.tab === "sheets") app.innerHTML = viewSheets();
+  else if (ui.tab === "campaign") app.innerHTML = viewCampaign();
   else if (ui.tab === "armoury") app.innerHTML = viewArmoury();
   else app.innerHTML = viewSaved();
   applyFilter("trait"); applyFilter("weap");
@@ -652,21 +1047,49 @@ function render() {
 }
 
 function renderMeter() {
-  const w = wb(), total = wbTotal(w), over = total > w.limit;
+  const w = wb(), total = wbTotal(w), cp = w.campaign;
+  if (cp) {
+    $("#meter").innerHTML = `<div class="pts num">${total} <small>pts value</small></div>
+      <div class="credits"><b>${cp.credits}</b> credits · <b>${cp.pool}</b> CP in pool · game <b>${cp.games + 1}</b> next</div>`;
+    return;
+  }
+  const over = total > w.limit;
   const pct = Math.min(100, (total / Math.max(1, w.limit)) * 100);
   const left = w.limit - total;
+  const vcount = w.vehicles.length;
   $("#meter").innerHTML = `
     <div class="pts num ${over ? "over" : ""}">${total} <small>/ ${w.limit} pts</small></div>
     <div class="bar ${over ? "over" : ""}" role="img" aria-label="${Math.round(pct)}% of points spent"><i style="width:${pct}%"></i></div>
-    <div class="credits">${over ? `<b style="color:var(--bad)">${-left}</b> over` : `<b>${left}</b> left → credits`} · <b>${modelCount(w)}</b> models</div>`;
+    <div class="credits">${over ? `<b style="color:var(--bad)">${-left}</b> over` : `<b>${left}</b> left → credits`} · <b>${modelCount(w)}</b> models${vcount ? ` · <b>${vcount}</b> vehicle${vcount > 1 ? "s" : ""}` : ""}</div>`;
 }
 function renderQuote() {
   const [q, src] = QUOTES[ui.quote];
   $("#quote").innerHTML = `<div>“${esc(q)}”${src ? ` <span class="muted" style="font-style:normal">— ${esc(src)}</span>` : ""}</div><button class="btn ghost sm" data-act="quote" aria-label="Another quote">↻</button>`;
 }
 function renderTabs() {
-  const tabs = [["build", "Build"], ["sheets", "Character sheets"], ["armoury", "Custom weapons"], ["saved", "Saved warbands"]];
+  const tabs = [["build", "Build"], ["sheets", "Sheets"], ["campaign", camp() ? "Campaign ●" : "Campaign"], ["armoury", "Custom weapons"], ["saved", "Saved warbands"]];
   $("#tabs").innerHTML = tabs.map(([k, l]) => `<button class="tab" role="tab" aria-selected="${ui.tab === k}" data-act="tab" data-v="${k}">${l}</button>`).join("");
+}
+const checkList = list => list.map(([lvl, m]) => `<div class="chk"><i class="dot ${lvl === "ok" ? "" : lvl === "bad" ? "bad" : lvl === "warn" ? "warn" : "info"}"></i><span>${esc(m)}</span></div>`).join("");
+
+function rosterCard(u) {
+  const cost = unitCost(u);
+  const line = isV(u)
+    ? (() => { const st = vStats(u); return `A${u.skills.A} S${u.skills.S} · ${V_SIZES[st.size].name} ${VTYPE[u.type].name.toLowerCase()} · ${st.hp}HP`; })()
+    : `A${u.skills.A} S${u.skills.S} F${u.skills.F} P${u.skills.P} AW${u.skills.AW} · ${u.hp}HP`;
+  const tags = [];
+  if (!isV(u) && u.squad) tags.push(`<span class="pill acc">Squad ×${u.size}</span>`);
+  if (u.draft) tags.push(`<span class="pill warn">Unpaid</span>`);
+  else if (pending(u)) tags.push(`<span class="pill warn">Changes</span>`);
+  if (u.status === "dead") tags.push(`<span class="pill bad">Dead</span>`);
+  if (u.status === "destroyed") tags.push(`<span class="pill bad">Destroyed</span>`);
+  if (u.outNext) tags.push(`<span class="pill">Sits out</span>`);
+  return `<button class="rcard ${gone(u) ? "gone" : ""}" data-act="select" data-v="${u.id}" aria-current="${u.id === ui.sel}">
+    ${avatar(u)}
+    <span class="nm">${esc(u.name || "Unnamed")}${tags.join("")}</span>
+    <span class="c" data-cost="${u.id}">${gone(u) ? "—" : cost}</span>
+    <span class="line">${line}</span>
+  </button>`;
 }
 
 function viewBuild() {
@@ -676,56 +1099,72 @@ function viewBuild() {
       <div class="wb-head">
         <div class="row">
           <label class="field"><span>Warband</span><input class="input" id="wb-name" data-bind="wb-name" value="${esc(w.name)}"></label>
-          <label class="field"><span>Points</span><input class="input num" id="wb-limit" data-bind="wb-limit" type="number" min="0" step="50" value="${w.limit}"></label>
+          <label class="field"><span>Points</span><input class="input num" id="wb-limit" data-bind="wb-limit" type="number" min="0" step="50" value="${w.limit}" ${w.campaign ? "disabled" : ""}></label>
         </div>
       </div>
       <div class="roster">
-        ${w.characters.map(c => {
-          const p = costParts(c);
-          return `<button class="rcard" data-act="select" data-v="${c.id}" aria-current="${c.id === ui.sel}">
-            ${avatar(c)}
-            <span class="nm">${esc(c.name || "Unnamed")}${c.squad ? `<span class="pill acc">Squad ×${c.size}</span>` : ""}</span>
-            <span class="c" data-cost="${c.id}">${p.total}</span>
-            <span class="line">A${c.skills.A} S${c.skills.S} F${c.skills.F} P${c.skills.P} AW${c.skills.AW} · ${c.hp}HP</span>
-          </button>`;
-        }).join("")}
-        <button class="btn primary" data-act="add-char" style="justify-content:center">+ Add character</button>
+        <div class="rail-h">Characters</div>
+        ${w.characters.map(rosterCard).join("")}
+        <button class="btn primary" data-act="add-char" style="justify-content:center">+ ${w.campaign ? "Recruit character" : "Add character"}</button>
+        <div class="rail-h">Vehicles</div>
+        ${w.vehicles.map(rosterCard).join("") || `<p class="note" style="margin:0">Jetbikes, tanks, walkers, a creepy cottage with legs…</p>`}
+        <button class="btn" data-act="add-veh" style="justify-content:center">+ ${w.campaign ? "Buy vehicle" : "Add vehicle"}</button>
       </div>
-      <div class="checks" id="wb-checks">${wbChecks().map(([lvl, m]) => `<div class="chk"><i class="dot ${lvl === "ok" ? "" : lvl === "bad" ? "bad" : "warn"}"></i><span>${esc(m)}</span></div>`).join("")}</div>
+      <div class="checks" id="wb-checks">${checkList(wbChecks())}</div>
     </aside>
-    <section class="dossier">${ch() ? viewChar(ch()) : viewBlank()}</section>
+    <section class="dossier">${sel() ? (isV(sel()) ? viewVehicle(sel()) : viewChar(sel())) : viewBlank()}</section>
   </div>`;
 }
 function viewBlank() {
   return `<div class="blank"><h2>No characters yet</h2><p style="margin:0;max-width:46ch">Every character starts at 10 points with all skills at 1, 20 hit-points and a speed of 10cm. Your warband needs at least two.</p><button class="btn primary" data-act="add-char">+ Add your first character</button></div>`;
+}
+function pendingBanner(u) {
+  const cp = camp(); if (!cp) return "";
+  if (gone(u)) return `<div class="banner bad"><div><b>${u.status === "dead" ? "Dead" : "Destroyed"}.</b> ${u.status === "dead" ? "Divide their possessions amongst the warband and recruit a replacement from the Campaign tab." : "Its salvage can go toward a new vehicle."}</div></div>`;
+  const p = pending(u); if (!p) return "";
+  const src = p.pool ? `warband pool (${cp.pool} CP${isV(u) && cp.salvage ? ` + ${cp.salvage} salvage` : ""})` : `${esc(u.name)}'s ${u.cp || 0} CP`;
+  return `<div class="banner">
+    <div style="min-width:0"><b>${u.draft ? (isV(u) ? "New vehicle, not yet paid for." : "New recruit, not yet paid for.") : "Unconfirmed campaign changes."}</b>
+      <div class="note">${esc(p.lines.join(" · "))}</div>
+      <div class="note">Costs <b class="num">${p.points} CP</b> from ${src}${p.credits ? ` and <b class="num">${p.credits} credits</b> (warband has ${cp.credits})` : ""}.</div></div>
+    <div class="acts"><button class="btn primary sm" data-act="pay" data-v="${u.id}">Pay &amp; confirm</button><button class="btn sm" data-act="undo" data-v="${u.id}">${u.draft ? "Discard" : "Undo"}</button></div>
+  </div>`;
+}
+function photoBlock(u) {
+  return `<div class="photo-wrap">
+      <div class="photo-drop" data-drop="photo" title="Drop a picture here">${avatar(u, "photo")}</div>
+      <div class="acts">
+        <label class="btn sm file-btn">${u.photo ? "Change" : "Add photo"}<input type="file" accept="image/*" id="c-photo" data-photo="1"></label>
+        ${u.photo ? `<button class="btn sm ghost" data-act="photo-del">Remove</button>` : ""}
+      </div>
+    </div>`;
+}
+function headerButtons(u) {
+  return `<div style="display:flex;gap:6px;flex-wrap:wrap">
+        ${camp() ? "" : `<button class="btn sm" data-act="dup">Duplicate</button>`}
+        ${ui.confirm === u.id ? `<button class="btn sm danger" data-act="del-yes">Confirm delete</button><button class="btn sm" data-act="del-no">Keep</button>` : `<button class="btn sm danger" data-act="del">Delete</button>`}
+      </div>`;
 }
 
 function viewChar(c) {
   const p = costParts(c);
   const sp = speedOf(c);
   const checks = charChecks(c);
-  return `
+  const cp = camp(), locked = cp && !c.draft;
+  const hpStep = locked ? CAMPAIGN.hpStep : RULES.hpStep;
+  const minSkill = k => locked ? c.snap.skills[k] : RULES.skillMin;
+  const eff = cp ? effective(c) : null;
+  return `${pendingBanner(c)}
   <div class="sec">
-    <div class="sec-h"><h2>Background</h2>
-      <div style="display:flex;gap:6px;flex-wrap:wrap">
-        <button class="btn sm" data-act="dup">Duplicate</button>
-        ${ui.confirm === c.id ? `<button class="btn sm danger" data-act="del-yes">Confirm delete</button><button class="btn sm" data-act="del-no">Keep</button>` : `<button class="btn sm danger" data-act="del">Delete</button>`}
-      </div>
-    </div>
+    <div class="sec-h"><h2>Background</h2>${headerButtons(c)}</div>
     <div class="id-wrap">
-    <div class="photo-wrap">
-      <div class="photo-drop" data-drop="photo" title="Drop a picture here">${avatar(c, "photo")}</div>
-      <div class="acts">
-        <label class="btn sm file-btn">${c.photo ? "Change" : "Add photo"}<input type="file" accept="image/*" id="c-photo" data-photo="1"></label>
-        ${c.photo ? `<button class="btn sm ghost" data-act="photo-del">Remove</button>` : ""}
-      </div>
-    </div>
+    ${photoBlock(c)}
     <div class="id-fields">
     <div class="id-grid">
       <label class="field"><span>Name</span><input class="input" id="c-name" data-bind="c-name" value="${esc(c.name)}"></label>
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding-bottom:6px">
-        <label class="toggle"><input type="checkbox" id="c-squad" data-act="squad" ${c.squad ? "checked" : ""}> Squad</label>
-        ${c.squad ? `<div class="qty" aria-label="Squad size"><button data-act="size" data-v="-1" aria-label="Fewer members">−</button><span>${c.size}</span><button data-act="size" data-v="1" aria-label="More members">+</button></div><span class="note">members</span>` : ""}
+        <label class="toggle"><input type="checkbox" id="c-squad" data-act="squad" ${c.squad ? "checked" : ""} ${locked ? "disabled" : ""}> Squad</label>
+        ${c.squad ? `<div class="qty" aria-label="Squad size"><button data-act="size" data-v="-1" aria-label="Fewer members" ${locked ? "disabled" : ""}>−</button><span>${c.size}</span><button data-act="size" data-v="1" aria-label="More members" ${locked ? "disabled" : ""}>+</button></div><span class="note">members</span>` : ""}
       </div>
     </div>
     <label class="field"><span>Who are they?</span><textarea class="input" id="c-bg" data-bind="c-bg" placeholder="Who are they, why are they part of this warband, what are their strengths and weaknesses?">${esc(c.background)}</textarea></label>
@@ -735,26 +1174,27 @@ function viewChar(c) {
   </div>
 
   <div class="sec">
-    <div class="sec-h"><h2>Profile</h2><span class="tot">skills <b>${sgn(p.skills)}</b> · hit-points <b>${sgn(p.hp)}</b></span></div>
+    <div class="sec-h"><h2>Profile</h2><span class="tot">${locked ? `+1 skill <b>${CAMPAIGN.skillCP} CP</b> · +${CAMPAIGN.hpStep} hit-points <b>${CAMPAIGN.hpCP} CP</b>` : `skills <b>${sgn(p.skills)}</b> · hit-points <b>${sgn(p.hp)}</b>`}</span></div>
     <div class="stats">
       ${SKILLS.map(s => `<div class="stat" title="${esc(s.d)}">
         <span class="lbl">${s.name.slice(0, 3)} (${s.k})</span>
-        <span class="val">${c.skills[s.k]}</span>
-        <span class="ctl"><button data-act="skill" data-k="${s.k}" data-v="-1" ${c.skills[s.k] <= RULES.skillMin ? "disabled" : ""} aria-label="Lower ${s.name}">−</button><button data-act="skill" data-k="${s.k}" data-v="1" ${c.skills[s.k] >= RULES.skillMax ? "disabled" : ""} aria-label="Raise ${s.name}">+</button></span>
+        <span class="val">${c.skills[s.k]}${eff && eff.skills[s.k] !== c.skills[s.k] ? `<small class="inj"> ${eff.skills[s.k]}</small>` : ""}</span>
+        <span class="ctl"><button data-act="skill" data-k="${s.k}" data-v="-1" ${c.skills[s.k] <= minSkill(s.k) ? "disabled" : ""} aria-label="Lower ${s.name}">−</button><button data-act="skill" data-k="${s.k}" data-v="1" ${c.skills[s.k] >= RULES.skillMax ? "disabled" : ""} aria-label="Raise ${s.name}">+</button></span>
         <span class="cost">${(c.skills[s.k] - 1) * RULES.skillCost} pts</span>
       </div>`).join("")}
       <div class="stat">
         <span class="lbl">Hit-points</span>
-        <span class="val">${c.hp}</span>
-        <span class="ctl"><button data-act="hp" data-v="-1" ${c.hp <= RULES.hpMin ? "disabled" : ""} aria-label="Lower hit-points">−</button><button data-act="hp" data-v="1" aria-label="Raise hit-points">+</button></span>
-        <span class="cost">${sgn(p.hp)} pts</span>
+        <span class="val">${c.hp}${eff && eff.hp !== c.hp ? `<small class="inj"> ${eff.hp}</small>` : ""}</span>
+        <span class="ctl"><button data-act="hp" data-v="-1" ${c.hp - hpStep < (locked ? c.snap.hp : RULES.hpMin) ? "disabled" : ""} aria-label="Lower hit-points">−</button><button data-act="hp" data-v="1" aria-label="Raise hit-points">+</button></span>
+        <span class="cost">${locked ? `±${hpStep}` : `${sgn(p.hp)} pts`}</span>
       </div>
       <div class="stat fixed" title="Speed cannot be changed with points.">
         <span class="lbl">Speed</span>
-        <span class="val">${sp.s}<small>cm</small></span>
+        <span class="val">${sp.s}<small>cm</small>${eff && eff.speed !== sp.s ? `<small class="inj"> ${eff.speed}</small>` : ""}</span>
         <span class="cost" style="margin-top:4px">${sp.notes.length ? sp.notes.join(" ") + " / turn" : "fixed"}</span>
       </div>
     </div>
+    ${eff && (eff.changed || eff.notes.length) ? `<p class="note" style="margin:0"><span class="inj">Small orange numbers</span> include injuries.${eff.notes.length ? " " + esc(eff.notes.join("; ")) + "." : ""}</p>` : ""}
   </div>
 
   <div class="sec">
@@ -789,7 +1229,7 @@ function viewChar(c) {
 
   <div class="sec">
     <div class="sec-h"><h2>Equipment</h2><span class="tot"><b>${p.equipment}</b> credits${c.squad ? " each" : ""}</span></div>
-    <p class="intro">During creation, points buy equipment 1 for 1 as credits. Anything left over when the warband is finished becomes credits.</p>
+    <p class="intro">${locked ? "During a campaign, new equipment is paid for with the warband's credits." : "During creation, points buy equipment 1 for 1 as credits. Anything left over when the warband is finished becomes credits."}</p>
 
     <div class="sub-h">Carried weapons</div>
     <div class="carried">
@@ -863,19 +1303,139 @@ function viewChar(c) {
     <div class="sec">
       <div class="sec-h"><h2>Notes</h2></div>
       <div style="display:grid;gap:8px;font-size:14px">
-        ${checks.length ? checks.map(([lvl, m]) => `<div class="chk"><i class="dot ${lvl === "bad" ? "bad" : lvl === "warn" ? "warn" : ""}"></i><span>${esc(m)}</span></div>`).join("") : `<div class="chk"><i class="dot"></i><span>Nothing to flag on this character.</span></div>`}
+        ${checks.length ? checkList(checks) : checkList([["ok", "Nothing to flag on this character."]])}
       </div>
+    </div>
+  </div>`;
+}
+
+/* ---------- vehicle editor ---------- */
+function viewVehicle(v) {
+  const k = vCost(v), st = vStats(v), checks = vChecks(v);
+  const cp = camp(), locked = cp && !v.draft;
+  const minS = key => locked ? v.snap.skills[key] : VEHICLE.skillStart;
+  const merc = v.traits.includes("Mercenary");
+  const rangedWeapons = [...WEAPONS.filter(x => /ranged/i.test(x.type)), ...(wb().customWeapons || []).filter(x => /ranged/i.test(x.type))];
+  const cells = [];
+  for (let r = 0; r < GRID_R; r++) for (let c = 0; c < GRID_C; c++) {
+    const key = `${r}-${c}`, id = v.cells[key], s = SECT[id], z = zoneOf(r, c), f = facingOf(r, c, st.size);
+    const isCore = s?.core && !(merc && id === "crew-core");
+    cells.push(`<button class="cell z-${z} ${s ? "filled" : ""} ${isCore ? "core" : ""}" data-act="cell" data-v="${key}" aria-label="${s ? s.name : "Empty"}${f ? ", " + f : ""}" title="${s ? esc(s.name + " · " + s.hp + "HP") : "Empty"}${f ? " · " + f : ""}">
+      ${s ? `<span class="cn">${esc(s.short)}</span>${s.mount && v.mounts[key] ? `<span class="cw">${esc(weaponById(v.mounts[key])?.name || "")}</span>` : ""}` : ""}
+      ${s && f ? `<span class="cf">${f[0]}</span>` : ""}
+    </button>`);
+  }
+  return `${pendingBanner(v)}
+  <div class="sec">
+    <div class="sec-h"><h2>Vehicle</h2>${headerButtons(v)}</div>
+    <div class="id-wrap">
+      ${photoBlock(v)}
+      <div class="id-fields">
+        <label class="field"><span>Name</span><input class="input" id="v-name" data-bind="c-name" value="${esc(v.name)}"></label>
+        <label class="field"><span>What is it, and who is it for?</span><textarea class="input" id="v-bg" data-bind="c-bg" placeholder="An armoured ground cruiser packed with corporate security? A camper-van with less than legal anti-grav engines?">${esc(v.background)}</textarea></label>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><h2>Profile</h2><span class="tot">${locked ? `+1 skill <b>${CAMPAIGN.vSkillCP} CP</b>` : `skills <b>${sgn(k.skills)}</b>`}</span></div>
+    <div class="stats">
+      ${[["A", "Agility"], ["S", "Shooting"]].map(([key, name]) => `<div class="stat">
+        <span class="lbl">${name.slice(0, 3)} (${key})</span><span class="val">${v.skills[key]}</span>
+        <span class="ctl"><button data-act="vskill" data-k="${key}" data-v="-1" ${v.skills[key] <= minS(key) ? "disabled" : ""} aria-label="Lower ${name}">−</button><button data-act="vskill" data-k="${key}" data-v="1" ${v.skills[key] >= VEHICLE.skillMax ? "disabled" : ""} aria-label="Raise ${name}">+</button></span>
+        <span class="cost">${(v.skills[key] - 2) * 10} pts</span></div>`).join("")}
+      <div class="stat fixed" title="Set by size"><span class="lbl">Fig (F)</span><span class="val">${st.fight}</span><span class="cost" style="margin-top:4px">${st.dmg} dmg</span></div>
+      <div class="stat fixed"><span class="lbl">Speed</span><span class="val">${st.speed}<small>cm</small></span><span class="cost" style="margin-top:4px">${VTYPE[v.type].name}</span></div>
+      <div class="stat fixed"><span class="lbl">Hit-points</span><span class="val">${st.hp}</span><span class="cost" style="margin-top:4px">${st.sections} sections</span></div>
+      <div class="stat fixed"><span class="lbl">Size</span><span class="val" style="font-size:18px;padding-block:5px">${V_SIZES[st.size].name}</span><span class="cost" style="margin-top:4px">from the grid</span></div>
+      <div class="stat fixed"><span class="lbl">Crew</span><span class="val">${st.crew}</span><span class="cost" style="margin-top:4px">${st.transport ? `carries ${st.transport}` : "weapons/action"}</span></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><h2>Type</h2><span class="tot"><b>${sgn(k.type) || 0}</b> pts</span></div>
+    <div class="armour-grid">
+      ${V_TYPES.map(t => `<button class="arm" data-act="vtype" data-v="${t.id}" aria-pressed="${v.type === t.id}">
+        <span class="t">${esc(t.name)} <span class="num">${t.cost ? "+" + t.cost : "free"} · ${t.speed}cm</span></span>
+        <span class="d">${esc(t.effect)}</span></button>`).join("")}
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><h2>Building grid</h2><span class="tot">sections <b>${k.sections}</b> pts</span></div>
+    <p class="intro">Pick a section, then tap squares to place it. Tap a placed section again to remove it. Up to 6 sections fit a small vehicle; filling the shaded ring makes it medium, and the outer ring makes it large. Letters show each section's facing.</p>
+    <div class="vgrid-wrap">
+      <div>
+        <div class="vgrid" role="grid" aria-label="Vehicle building grid">${cells.join("")}</div>
+        <div class="vgrid-legend"><span><i class="lg z-small"></i>Small</span><span><i class="lg z-medium"></i>Medium</span><span><i class="lg z-large"></i>Large</span></div>
+      </div>
+      <div class="palette" role="radiogroup" aria-label="Section to place">
+        ${SECTIONS.filter(s => !s.core).map(s => `<button class="pal" role="radio" aria-checked="${ui.brush === s.id}" data-act="brush" data-v="${s.id}">
+          <span class="t">${esc(s.name)}</span><span class="num">${s.cost} pts · ${s.hp}HP</span><span class="d">${esc(s.d)}</span></button>`).join("")}
+        <button class="pal" role="radio" aria-checked="${ui.brush === "erase"}" data-act="brush" data-v="erase"><span class="t">Eraser</span><span class="d">Tap a section to clear it.</span></button>
+        ${merc ? `<p class="note" style="margin:0">Mercenary: the core crew section can be painted over.</p>` : ""}
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><h2>Weapons</h2><span class="tot"><b>${k.weapons}</b> pts</span></div>
+    <p class="intro">Each hard point or turret mounts one weapon. Vehicles can mount any ranged weapon or a vehicle weapon, bought with points. A hard point fires from its own facing; a turret fires in any direction.</p>
+    ${st.mounts.length ? `<div class="carried">${st.mounts.map(m => {
+      const [r, c] = m.k.split("-").map(Number); const f = m.s.turret ? "any direction" : (facingOf(r, c, st.size) || "any direction");
+      const cur = v.mounts[m.k] || "";
+      return `<div class="citem mount"><div style="min-width:0"><div class="nm">${esc(m.s.name)} <span class="pill">${esc(f)}</span></div>
+        <select class="input" id="mount-${m.k}" data-mount="${m.k}" aria-label="Weapon on ${esc(m.s.name)}">
+          <option value="">— empty —</option>
+          <optgroup label="Vehicle weapons">${V_WEAPONS.map(w => `<option value="${w.id}" ${cur === w.id ? "selected" : ""}>${esc(w.name)} · ${w.dmg} · ${w.rangeText || w.range + "cm"} · ${w.cost}</option>`).join("")}</optgroup>
+          <optgroup label="Ranged weapons">${rangedWeapons.map(w => `<option value="${w.id}" ${cur === w.id ? "selected" : ""}>${esc(w.name)} · ${w.dmg} · ${w.range}cm · ${w.cost}</option>`).join("")}</optgroup>
+        </select></div>
+        <span class="num" style="min-width:42px;text-align:right">${cur ? weaponById(cur)?.cost || 0 : 0}</span></div>`;
+    }).join("")}</div>` : `<p class="empty">No hard points yet. Place a Hard point or Turret hard point on the grid to mount a weapon.</p>`}
+  </div>
+
+  <div class="two">
+    <div class="sec">
+      <div class="sec-h"><h2>Traits</h2><span class="tot"><b>${sgn(k.traits) || 0}</b> pts</span></div>
+      <div class="picker"><div class="list" data-scroll="vtraits">
+        ${V_TRAITS.map(t => { const on = v.traits.includes(t.name); return `<button class="opt ${on ? "on" : ""}" data-act="vtrait" data-v="${esc(t.name)}"><span class="box">${on ? "✓" : ""}</span><span><span class="t">${esc(t.name)}</span><br><span class="d">${esc(t.effect)}</span></span><span class="cst ${t.cost < 0 ? "neg" : ""}">${sgn(t.cost)}</span></button>`; }).join("")}
+      </div></div>
+    </div>
+    <div class="sec">
+      <div class="sec-h"><h2>Abilities</h2><span class="tot"><b>${k.abilities}</b> pts</span></div>
+      <div class="picker"><div class="list">
+        ${V_ABILITIES.map(a => { const on = v.abilities.includes(a.name); return `<button class="opt ${on ? "on" : ""}" data-act="vabil" data-v="${esc(a.name)}"><span class="box">${on ? "✓" : ""}</span><span><span class="t">${esc(a.name)}</span><br><span class="d">${esc(a.effect)}</span></span><span class="cst">${sgn(a.cost)}</span></button>`; }).join("")}
+      </div></div>
+    </div>
+  </div>
+
+  <div class="two">
+    <div class="sec">
+      <div class="sec-h"><h2>Points</h2></div>
+      <div class="ledger">
+        <div><span>Base cost</span><span>${k.base}</span></div>
+        <div><span>Skills</span><span>${k.skills}</span></div>
+        <div><span>Type</span><span>${k.type}</span></div>
+        <div><span>Sections</span><span>${k.sections}</span></div>
+        <div><span>Traits</span><span>${k.traits}</span></div>
+        <div><span>Abilities</span><span>${k.abilities}</span></div>
+        <div><span>Weapons</span><span>${k.weapons}</span></div>
+        <div class="total"><span>Vehicle total</span><span>${k.total}</span></div>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="sec-h"><h2>Notes</h2></div>
+      <div style="display:grid;gap:8px;font-size:14px">${checks.length ? checkList(checks) : checkList([["ok", "Nothing to flag on this vehicle."]])}</div>
     </div>
   </div>`;
 }
 
 /* ---------- sheets ---------- */
 function viewSheets() {
-  const w = wb();
-  if (!w.characters.length) return `<div class="page">${viewBlank()}</div>`;
-  return `<div class="sheets-bar"><h2 style="font-size:22px">${esc(w.name)}</h2><span class="note">${wbTotal(w)} / ${w.limit} pts · ${modelCount(w)} models · Hosted outside Claude, Ctrl/Cmd+P prints these sheets.</span></div>
-  <div class="sheets">${w.characters.map(c => {
-    const p = costParts(c), sp = speedOf(c);
+  const w = wb(), cp = w.campaign;
+  if (!allUnits(w).length) return `<div class="page">${viewBlank()}</div>`;
+  const charSheets = w.characters.filter(c => !gone(c)).map(c => {
+    const p = costParts(c), sp = speedOf(c), eff = cp ? effective(c) : { skills: c.skills, hp: c.hp, speed: sp.s, notes: [] };
     const arcana = c.traits.includes("Minor arcana") || c.traits.includes("Major arcana");
     const eq = [
       ...c.weapons.map(x => { const wp = weaponById(x.id); return wp ? `${x.qty > 1 ? x.qty + "× " : ""}<b>${esc(wp.name)}</b> <span class="mono">${esc(wp.dmg)}${wp.range ? " · " + wp.range + "cm" : ""}</span>${wp.rules.length ? " · " + esc(wp.rules.join(", ")) : ""}` : ""; }),
@@ -886,20 +1446,200 @@ function viewSheets() {
       <div class="sheet-h"><h3>${esc(c.name || "Unnamed")}${c.squad ? ` <span class="pill acc">Squad ×${c.size}</span>` : ""}</h3><span class="num">Points cost: <b>${p.total}</b>${c.squad ? ` <span class="muted">(${p.each} each)</span>` : ""}</span></div>
       ${c.photo || c.background ? `<div class="sheet-top">${c.photo ? avatar(c) : ""}${c.background ? `<div class="bg">${esc(c.background)}</div>` : ""}</div>` : ""}
       <div class="sstats">
-        ${SKILLS.map(s => `<div><div class="k">${s.name}</div><div class="v">${c.skills[s.k]}</div></div>`).join("")}
-        <div><div class="k">Speed</div><div class="v">${sp.s}<span style="font-size:11px">cm</span></div></div>
-        <div><div class="k">HP</div><div class="v">${c.hp}</div></div>
+        ${SKILLS.map(s => `<div><div class="k">${s.name}</div><div class="v">${eff.skills[s.k]}</div></div>`).join("")}
+        <div><div class="k">Speed</div><div class="v">${eff.speed}<span style="font-size:11px">cm</span></div></div>
+        <div><div class="k">HP</div><div class="v">${eff.hp}</div></div>
       </div>
       <div class="sblock"><div class="k">Traits</div>${c.traits.length ? `<ul>${c.traits.map(n => `<li><b>${esc(n)}.</b> ${esc(TRAIT[n].effect)}</li>`).join("")}</ul>` : `<p class="muted">None</p>`}</div>
       <div class="sblock"><div class="k">Abilities</div>${c.abilities.length ? `<ul>${c.abilities.map(n => `<li><b>${esc(n)}.</b> ${esc(ABIL[n].effect)}</li>`).join("")}</ul>` : `<p class="muted">None</p>`}</div>
       ${arcana ? `<div class="sblock"><div class="k">Arcana (roll 1D12 per ability)</div><p>${ARCANA.map((a, i) => `<span class="mono">${i + 1}</span> ${esc(a[0])}`).join(" · ")}</p></div>` : ""}
       <div class="sblock"><div class="k">Equipment</div><ul>${eq.filter(Boolean).map(e => `<li>${e}</li>`).join("")}</ul></div>
       <div class="two" style="gap:12px">
-        <div class="sblock"><div class="k">Injuries</div><div class="lines"></div></div>
-        <div class="sblock"><div class="k">Campaign points</div><div class="lines"></div></div>
+        <div class="sblock"><div class="k">Injuries</div>${cp && c.injuries?.length ? `<ul>${c.injuries.map(i => `<li><b>${esc(i.name)}.</b> ${esc(INJURIES[i.n - 1].effect)}${i.dur ? ` (${i.dur} game${i.dur > 1 ? "s" : ""} left)` : ""}</li>`).join("")}</ul>` : `<div class="lines"></div>`}</div>
+        <div class="sblock"><div class="k">Campaign points</div>${cp ? `<p class="num" style="font-size:18px">${c.cp || 0}</p>${c.agenda ? `<p><b>Agenda:</b> ${esc(AGENDAS[c.agenda.n - 1].name)} (worth ${agendaWorth(c.agenda)})</p>` : ""}` : `<div class="lines"></div>`}</div>
       </div>
     </article>`;
-  }).join("")}</div>`;
+  });
+  const vehSheets = w.vehicles.filter(v => !gone(v)).map(v => {
+    const k = vCost(v), st = vStats(v);
+    const mini = [];
+    for (let r = 0; r < GRID_R; r++) for (let c = 0; c < GRID_C; c++) {
+      const key = `${r}-${c}`, s = SECT[v.cells[key]];
+      mini.push(`<div class="mcell z-${zoneOf(r, c)} ${s ? "filled" : ""}">${s ? esc(s.short) : ""}</div>`);
+    }
+    const weapons = st.mounts.filter(m => v.mounts[m.k]).map(m => {
+      const wp = weaponById(v.mounts[m.k]); const [r, c] = m.k.split("-").map(Number);
+      return `<li><b>${esc(wp.name)}</b> <span class="mono">${esc(wp.dmg)} · ${wp.rangeText || wp.range + "cm"}</span>${wp.rules.length ? " · " + esc(wp.rules.join(", ")) : ""} <span class="muted">(${m.s.turret ? "turret" : facingOf(r, c, st.size) || "hard point"})</span></li>`;
+    });
+    return `<article class="sheet">
+      <div class="sheet-h"><h3>${esc(v.name || "Unnamed")} <span class="pill">Vehicle</span></h3><span class="num">Points cost: <b>${k.total}</b></span></div>
+      ${v.photo || v.background ? `<div class="sheet-top">${v.photo ? avatar(v) : ""}${v.background ? `<div class="bg">${esc(v.background)}</div>` : ""}</div>` : ""}
+      <div class="sstats">
+        <div><div class="k">Agility</div><div class="v">${v.skills.A}</div></div>
+        <div><div class="k">Shooting</div><div class="v">${v.skills.S}</div></div>
+        <div><div class="k">Fighting</div><div class="v">${st.fight}</div></div>
+        <div><div class="k">Type</div><div class="v" style="font-size:14px;padding-top:4px">${VTYPE[v.type].name}</div></div>
+        <div><div class="k">Size</div><div class="v" style="font-size:14px;padding-top:4px">${V_SIZES[st.size].name}</div></div>
+        <div><div class="k">Speed</div><div class="v">${st.speed}<span style="font-size:11px">cm</span></div></div>
+        <div><div class="k">HP</div><div class="v">${st.hp}</div></div>
+      </div>
+      <div class="vsheet-body">
+        <div class="mgrid">${mini.join("")}</div>
+        <div style="display:grid;gap:8px;min-width:0">
+          <div class="sblock"><div class="k">Weapons</div>${weapons.length ? `<ul>${weapons.join("")}</ul>` : `<p class="muted">None</p>`}<p class="muted">Fights at ${st.fight} for ${st.dmg}. Fires ${st.crew} weapon${st.crew === 1 ? "" : "s"} per shooting action.</p></div>
+          <div class="sblock"><div class="k">Traits</div>${v.traits.length ? `<ul>${v.traits.map(n => `<li><b>${esc(n)}.</b> ${esc(VTRAIT[n].effect)}</li>`).join("")}</ul>` : `<p class="muted">None</p>`}</div>
+          <div class="sblock"><div class="k">Abilities</div>${v.abilities.length ? `<ul>${v.abilities.map(n => `<li><b>${esc(n)}.</b> ${esc(VABIL[n].effect)}</li>`).join("")}</ul>` : `<p class="muted">None</p>`}</div>
+        </div>
+      </div>
+      <div class="sblock"><div class="k">Sections</div><p>${vSections(v).map(x => { const [r, c] = x.k.split("-").map(Number); const f = facingOf(r, c, st.size); return `${esc(x.s.name)} <span class="mono">${x.s.hp}HP</span>${f ? ` <span class="muted">${f}</span>` : ""}`; }).join(" · ")}</p></div>
+      <div class="two" style="gap:12px">
+        <div class="sblock"><div class="k">Damages</div>${cp && v.damage?.length ? `<ul>${v.damage.map(d => `<li><b>${esc(d.name)}.</b> ${esc(V_DAMAGE[d.n - 1].effect)}</li>`).join("")}</ul>` : `<div class="lines"></div>`}</div>
+        <div class="sblock"><div class="k">Campaign points</div>${cp ? `<p class="num" style="font-size:18px">${v.cp || 0}</p>` : `<div class="lines"></div>`}</div>
+      </div>
+    </article>`;
+  });
+  return `<div class="sheets-bar"><h2 style="font-size:22px">${esc(w.name)}</h2><span class="note">${wbTotal(w)}${cp ? " pts value" : ` / ${w.limit} pts`} · ${modelCount(w)} models · Hosted outside Claude, Ctrl/Cmd+P prints these sheets.</span></div>
+  <div class="sheets">${[...charSheets, ...vehSheets].join("")}</div>`;
+}
+
+/* ---------- campaign ---------- */
+function viewCampaign() {
+  const w = wb(), cp = w.campaign;
+  if (!cp) {
+    const total = wbTotal(w);
+    return `<div class="page"><div class="sec" style="max-width:760px">
+      <div class="sec-h"><h2>Campaign play</h2></div>
+      <p class="intro" style="color:var(--ink)">Link your games into a story. Characters and vehicles earn campaign points after each game and spend them to improve. Injuries carry over, hidden agendas pay out, and the warband keeps a purse of credits.</p>
+      <ul class="rules-list">
+        <li>Starting credits are your unspent points: <b class="num">${Math.max(0, w.limit - total)}</b>.</li>
+        <li>After starting, a skill costs ${CAMPAIGN.skillCP} CP, +${CAMPAIGN.hpStep} hit-points cost ${CAMPAIGN.hpCP} CP, and traits and abilities cost their points in CP. Equipment is paid in credits.</li>
+        <li>New recruits cost ${CAMPAIGN.recruitCP} CP plus their skills, traits and abilities, paid from the warband pool. Replacements for dead characters skip the ${CAMPAIGN.recruitCP} CP fee.</li>
+        <li>Edits in the Build tab become unconfirmed changes you pay for, so nothing sneaks in for free.</li>
+      </ul>
+      ${wbChecks(w).some(x => x[0] === "bad") ? `<div class="checks">${checkList(wbChecks(w).filter(x => x[0] === "bad"))}</div>` : ""}
+      <div><button class="btn primary" data-act="camp-start">Start campaign with ${esc(w.name)}</button></div>
+    </div></div>`;
+  }
+  const units = allUnits(w).filter(u => !u.draft);
+  return `<div class="page">
+    <div class="camp-strip">
+      <div class="kpi"><span class="k">Games played</span><span class="v num">${cp.games}</span></div>
+      <div class="kpi"><span class="k">Credits</span><span class="v num">${cp.credits}</span>
+        <span class="adj"><input class="input num sm" type="number" id="cr-adj" placeholder="±" aria-label="Adjust credits"><button class="btn sm" data-act="cr-adj">Adjust</button></span></div>
+      <div class="kpi"><span class="k">Warband pool</span><span class="v num">${cp.pool} <small>CP</small></span>
+        <span class="adj"><select class="input sm" id="pool-to" aria-label="Give pool points to">${units.filter(u => !gone(u)).map(u => `<option value="${u.id}">${esc(u.name)}</option>`).join("")}</select><input class="input num sm" type="number" min="1" id="pool-amt" placeholder="CP" aria-label="Points to give"><button class="btn sm" data-act="pool-give">Give</button></span></div>
+      ${cp.salvage ? `<div class="kpi"><span class="k">Vehicle salvage</span><span class="v num">${cp.salvage} <small>pts</small></span></div>` : ""}
+      <div class="kpi end">${ui.rec ? "" : `<button class="btn primary" data-act="rec-open">Record a game</button>`}
+        ${ui.confirm === "camp-end" ? `<button class="btn sm danger" data-act="camp-end-yes">End and clear campaign</button><button class="btn sm" data-act="del-no">Keep</button>` : `<button class="btn sm ghost" data-act="camp-end">End campaign</button>`}</div>
+    </div>
+    ${ui.rec ? viewRecord() : ""}
+    <div class="ccards">${units.map(campCard).join("")}</div>
+    <div class="sec">
+      <div class="sec-h"><h2>Campaign log</h2></div>
+      ${cp.log.length ? `<ol class="log">${cp.log.map(l => `<li><span class="num muted">G${l.game}</span> ${esc(l.text)}</li>`).join("")}</ol>` : `<p class="empty">Nothing yet.</p>`}
+    </div>
+  </div>`;
+}
+function campCard(u) {
+  const cp = camp(), v = isV(u);
+  const p = pending(u);
+  if (gone(u)) {
+    return `<div class="ccard gone"><div class="cc-h">${avatar(u)}<div style="min-width:0"><div class="nm">${esc(u.name)}</div><div class="note">${u.status === "dead" ? "Dead" : "Destroyed"}</div></div></div>
+      <div class="acts">${!v ? `<button class="btn sm primary" data-act="replace" data-v="${u.id}">Recruit replacement</button>` : ""}<button class="btn sm" data-act="remove-gone" data-v="${u.id}">Remove from roster</button></div></div>`;
+  }
+  const merc = !v && u.traits.includes("Mercenary");
+  const venal = !v && u.traits.includes("Venal");
+  const inj = v ? (u.damage || []) : (u.injuries || []);
+  const table = v ? V_DAMAGE : INJURIES;
+  const healCost = v ? CAMPAIGN.vFixCP : CAMPAIGN.healCP;
+  return `<div class="ccard">
+    <div class="cc-h">${avatar(u)}<div style="min-width:0"><div class="nm">${esc(u.name)}${!v && u.squad ? ` <span class="pill acc">×${u.size}</span>` : ""}${v ? ` <span class="pill">Vehicle</span>` : ""}</div>
+      <div class="note">${unitCost(u)} pts${u.outNext ? " · sits out next game" : ""}</div></div>
+      <div class="cpbal"><span class="num">${u.cp || 0}</span><span class="k">CP</span></div></div>
+    ${u.pendingRoll ? `<div class="banner bad"><div><b>${v ? "Derelict or destroyed: roll on the vehicle damage table." : "Killed in the last game: roll on the injury table."}</b>
+      <div class="acts" style="margin-top:6px"><button class="btn sm primary" data-act="${v ? "vdmg-roll" : "inj-roll"}" data-v="${u.id}">Roll 1D${v ? 6 : 8}</button>
+      <select class="input sm" id="pick-${u.id}" aria-label="Or pick the result you rolled">${table.map(t => `<option value="${t.n}">${t.n}. ${esc(t.name)}</option>`).join("")}</select><button class="btn sm" data-act="${v ? "vdmg-pick" : "inj-pick"}" data-v="${u.id}">Use my roll</button></div></div></div>` : ""}
+    ${inj.length ? `<div class="cc-sec"><div class="k">${v ? "Damage" : "Injuries"}</div>${inj.map(i => `<div class="inj-row"><div style="min-width:0"><b>${esc(i.name)}</b>${i.dur ? ` <span class="note">${i.dur} game${i.dur > 1 ? "s" : ""} left</span>` : ""}<div class="note">${esc(table[i.n - 1].effect)}</div></div>
+      ${i.game < cp.games ? `<button class="btn sm" data-act="heal" data-v="${u.id}" data-i="${i.id}">${v ? "Fix" : "Heal"} · ${healCost} CP</button>` : `<span class="note">heal after 1 game</span>`}</div>`).join("")}</div>` : ""}
+    ${!v ? `<div class="cc-sec"><div class="k">Hidden agenda</div>${u.agenda ? `<div><b>${esc(AGENDAS[u.agenda.n - 1].name)}</b> <span class="note">worth ${agendaWorth(u.agenda)} CP</span><div class="note">${esc(AGENDAS[u.agenda.n - 1].effect)}</div></div><div class="acts"><button class="btn sm ghost" data-act="agenda-drop" data-v="${u.id}">Drop agenda</button></div>` : `<div class="acts"><button class="btn sm" data-act="agenda-roll" data-v="${u.id}">Roll 1D6 for an agenda</button></div>`}</div>` : ""}
+    <div class="cc-sec"><div class="k">Spend</div>
+      <div class="acts">
+        <button class="btn sm" data-act="goto" data-v="${u.id}">Upgrade in builder</button>
+        ${v ? "" : `<span class="conv"><input class="input num sm" type="number" min="${merc ? 1 : 2}" step="${merc ? 1 : 2}" id="conv-${u.id}" placeholder="CP" aria-label="Campaign points to convert"><button class="btn sm" data-act="convert" data-v="${u.id}">→ credits ${merc ? "1:1" : "2:1"}</button></span>`}
+        ${!v && u.squad && u.size > 1 ? `<button class="btn sm ghost" data-act="squad-lose" data-v="${u.id}">Member slain for good</button>` : ""}
+      </div>
+      ${p ? `<p class="note warn-t">Unconfirmed changes: ${p.points} CP${p.credits ? `, ${p.credits} cr` : ""}. Pay for them in the Build tab.</p>` : ""}
+      ${venal ? `<p class="note">Venal: must convert spare campaign points to credits.</p>` : ""}
+    </div>
+  </div>`;
+}
+function viewRecord() {
+  const w = wb(), r = ui.rec;
+  const chars = w.characters.filter(c => !gone(c) && !c.draft), vehs = w.vehicles.filter(v => !gone(v) && !v.draft);
+  const num = (id, f, v = 0) => `<input class="input num sm" type="number" min="0" id="rec-${id}-${f}" data-rec="${id}:${f}" value="${r.u[id]?.[f] ?? v}" aria-label="${f}">`;
+  const box = (id, f, label) => `<label class="toggle"><input type="checkbox" id="rec-${id}-${f}" data-rec="${id}:${f}" ${r.u[id]?.[f] ? "checked" : ""}> ${label}</label>`;
+  const mercs = chars.filter(c => c.traits.includes("Mercenary") && !c.outNext);
+  return `<div class="sec rec">
+    <div class="sec-h"><h2>Record game ${camp().games + 1}</h2><button class="btn sm ghost" data-act="rec-close">Cancel</button></div>
+    <p class="intro">Fill in what each character did. Characters earn 1 CP per successful shoot or fight action, 5 per enemy killed, 1 for surviving and 5 for finishing unwounded. Anyone killed rolls on the injury table afterwards.</p>
+    <div class="eq-wrap"><table class="eq-table rec-table">
+      <thead><tr><th>Character</th><th>Hits</th><th>Kills</th><th>Survived</th><th>Unwounded</th><th>Agenda done</th><th>Killed</th></tr></thead>
+      <tbody>${chars.map(c => c.outNext ? `<tr><td class="nm">${esc(c.name)}</td><td colspan="6" class="note">Sitting this game out (out of action).</td></tr>` : `<tr>
+        <td class="nm">${esc(c.name)}</td><td>${num(c.id, "hits")}</td><td>${num(c.id, "kills")}</td>
+        <td>${box(c.id, "surv", "")}</td><td>${box(c.id, "unw", "")}</td>
+        <td>${c.agenda ? box(c.id, "agenda", `${agendaWorth(c.agenda)}`) : `<span class="note">—</span>`}</td><td>${box(c.id, "killed", "")}</td></tr>`).join("")}</tbody>
+    </table></div>
+    ${vehs.length ? `<div class="eq-wrap"><table class="eq-table rec-table">
+      <thead><tr><th>Vehicle</th><th>Kills</th><th>Sections destroyed</th><th>Survived</th><th>No sections lost</th><th>Derelict / destroyed</th></tr></thead>
+      <tbody>${vehs.map(v => v.outNext ? `<tr><td class="nm">${esc(v.name)}</td><td colspan="5" class="note">In for slow repairs.</td></tr>` : `<tr>
+        <td class="nm">${esc(v.name)}</td><td>${num(v.id, "kills")}</td><td>${num(v.id, "secs")}</td>
+        <td>${box(v.id, "surv", "")}</td><td>${box(v.id, "noloss", "")}</td><td>${box(v.id, "wreck", "")}</td></tr>`).join("")}</tbody>
+    </table></div>` : ""}
+    <div class="rec-war">
+      ${box("w", "goal", "Achieved the scenario goal (+10 CP to the pool)")}
+      ${box("w", "half", "Destroyed 50% or more of the enemy warband (+10 CP to the pool)")}
+      ${mercs.length ? box("w", "paid", `Paid mercenaries before the game (−${mercs.length * 10} credits): ${mercs.map(m => esc(m.name)).join(", ")}`) : ""}
+    </div>
+    <div><button class="btn primary" data-act="rec-save">Save game results</button></div>
+  </div>`;
+}
+function saveRecord() {
+  const w = wb(), cp = w.campaign, r = ui.rec;
+  const lines = [];
+  const g = r.u.w || {};
+  const get = (id, f) => r.u[id]?.[f];
+  w.characters.filter(c => !gone(c) && !c.draft).forEach(c => {
+    if (c.outNext) { c.outNext = false; lines.push(`${c.name} sat out`); return; }
+    if (c.traits.includes("Mercenary") && !g.paid) { lines.push(`${c.name} was not paid`); }
+    let n = (+get(c.id, "hits") || 0) + 5 * (+get(c.id, "kills") || 0) + (get(c.id, "surv") ? 1 : 0) + (get(c.id, "unw") ? 5 : 0);
+    if (c.agenda) {
+      if (get(c.id, "agenda")) {
+        const worth = agendaWorth(c.agenda);
+        if (c.agenda.n === 6) { cp.pool += worth; lines.push(`${c.name}'s honourable death: +${worth} CP to the pool`); }
+        else n += worth;
+        c.agenda = null;
+      } else c.agenda.fails = (c.agenda.fails || 0) + 1;
+    }
+    c.cp = (c.cp || 0) + n;
+    lines.push(`${c.name} +${n} CP`);
+    if (get(c.id, "killed")) c.pendingRoll = true;
+    if (c.traits.includes("Rich")) { const cr = roll(8); cp.credits += cr; lines.push(`${c.name} is Rich: +${cr} credits`); }
+    (c.injuries || []).forEach(i => { if (i.dur > 0) i.dur--; });
+  });
+  w.vehicles.filter(v => !gone(v) && !v.draft).forEach(v => {
+    if (v.outNext) { v.outNext = false; lines.push(`${v.name} was in repairs`); return; }
+    const n = 5 * (+get(v.id, "kills") || 0) + (+get(v.id, "secs") || 0) + (get(v.id, "surv") ? 1 : 0) + (get(v.id, "noloss") ? 5 : 0);
+    v.cp = (v.cp || 0) + n; lines.push(`${v.name} +${n} CP`);
+    if (get(v.id, "wreck")) v.pendingRoll = true;
+  });
+  if (g.goal) { cp.pool += 10; lines.push("Scenario goal +10 CP to the pool"); }
+  if (g.half) { cp.pool += 10; lines.push("Enemy broken +10 CP to the pool"); }
+  const mercs = w.characters.filter(c => !gone(c) && c.traits.includes("Mercenary"));
+  if (g.paid && mercs.length) { cp.credits -= mercs.length * 10; lines.push(`Paid mercenaries ${mercs.length * 10} credits`); }
+  cp.games += 1;
+  cp.log.unshift({ game: cp.games, text: `Game ${cp.games} recorded. ${lines.join("; ")}.` });
+  ui.rec = null;
+  toast(`Game ${cp.games} recorded`);
 }
 
 /* ---------- custom weapons ---------- */
@@ -936,7 +1676,7 @@ function viewArmoury() {
     <div class="sec">
       <div class="sec-h"><h2>${esc(w.name)} armoury</h2></div>
       ${(w.customWeapons || []).length ? `<div class="carried">${w.customWeapons.map(cw => `<div class="citem"><div style="min-width:0"><div class="nm">${esc(cw.name)}</div><div class="meta">${esc(cw.type)} · ${esc(cw.dmg)} · ${cw.range ? cw.range + "cm" : "melee"} · ${cw.hands === 2 ? "two" : "one"}-handed${cw.rules.length ? " · " + esc(cw.rules.join(", ")) : ""}</div></div><span class="num">${cw.cost} cr</span><button class="btn sm danger" data-act="cwdel" data-v="${cw.id}">Remove</button></div>`).join("")}</div>
-      <p class="note">Custom weapons appear in every character's weapon list for this warband.</p>` : `<p class="empty">No custom weapons yet. Forged weapons are saved with this warband and show up in the weapon list on the Build tab.</p>`}
+      <p class="note">Custom weapons appear in every character's weapon list for this warband, and ranged ones can be mounted on vehicles.</p>` : `<p class="empty">No custom weapons yet. Forged weapons are saved with this warband and show up in the weapon list on the Build tab.</p>`}
     </div>
   </div></div>`;
 }
@@ -950,9 +1690,9 @@ function viewSaved() {
   return `<div class="page"><div class="two">
     <div class="sec">
       <div class="sec-h"><h2>Your warbands</h2><button class="btn primary sm" data-act="wb-new">+ New warband</button></div>
-      <p class="intro">Warbands are kept in this browser. To move one to another device or hand it to a friend, copy it as text and load it on the other side.</p>
+      <p class="intro">Warbands are kept in this browser. To move one to another device or hand it to a friend, copy it as text and load it on the other side. Campaign progress travels with it.</p>
       <div class="saved">${list.map(w => `<div class="srow" aria-current="${w.id === db.current}">
-        <div style="min-width:0"><div style="font-weight:600">${esc(w.name)}</div><div class="note num">${wbTotal(w)} / ${w.limit} pts · ${w.characters.length} entries</div></div>
+        <div style="min-width:0"><div style="font-weight:600">${esc(w.name)}${w.campaign ? ` <span class="pill acc">Campaign · ${w.campaign.games} games</span>` : ""}</div><div class="note num">${wbTotal(w)}${w.campaign ? " pts value" : ` / ${w.limit} pts`} · ${w.characters.length} characters${w.vehicles.length ? ` · ${w.vehicles.length} vehicles` : ""}</div></div>
         <div class="acts">
           ${w.id === db.current ? `<span class="pill acc">Open</span>` : `<button class="btn sm" data-act="wb-open" data-v="${w.id}">Open</button>`}
           <button class="btn sm" data-act="wb-copy" data-v="${w.id}">Copy as text</button>
@@ -974,66 +1714,124 @@ function viewSaved() {
    ===================================================================== */
 function toast(msg) {
   const t = $("#toast"); t.textContent = msg; t.hidden = false;
-  clearTimeout(toast._t); toast._t = setTimeout(() => t.hidden = true, 1800);
+  clearTimeout(toast._t); toast._t = setTimeout(() => t.hidden = true, 2200);
 }
 function refreshLight() {
-  // update totals without a full re-render (keeps focus in text inputs)
   renderMeter();
-  const w = wb();
-  w.characters.forEach(c => { const el = document.querySelector(`[data-cost="${c.id}"]`); if (el) el.textContent = charCost(c); });
+  allUnits().forEach(u => { const el = document.querySelector(`[data-cost="${u.id}"]`); if (el) el.textContent = gone(u) ? "—" : unitCost(u); });
   const cc = $("#wb-checks");
-  if (cc) cc.innerHTML = wbChecks().map(([lvl, m]) => `<div class="chk"><i class="dot ${lvl === "ok" ? "" : lvl === "bad" ? "bad" : "warn"}"></i><span>${esc(m)}</span></div>`).join("");
+  if (cc) cc.innerHTML = checkList(wbChecks());
 }
 function applyFilter(kind) {
   const val = (kind === "trait" ? ui.traitFilter : ui.weapFilter).toLowerCase().trim();
   const scope = kind === "trait" ? "#list-trait [data-search]" : "[data-scroll='weap'] [data-search]";
   document.querySelectorAll(scope).forEach(el => el.hidden = val && !el.dataset.search.includes(val));
 }
+const toggleIn = (arr, v) => arr.includes(v) ? arr.filter(x => x !== v) : [...arr, v];
 
 document.addEventListener("click", e => {
   const b = e.target.closest("[data-act]");
   if (!b) return;
-  const act = b.dataset.act, v = b.dataset.v, w = wb(), c = ch();
+  const act = b.dataset.act, v = b.dataset.v, w = wb(), u = sel(), c = ch(), vv = veh(), cp = w.campaign;
   switch (act) {
     case "tab": ui.tab = v; ui.confirm = null; break;
     case "quote": ui.quote = (ui.quote + 1) % QUOTES.length; renderQuote(); return;
     case "select": ui.sel = v; ui.confirm = null; break;
-    case "add-char": { const n = newCharacter(`Recruit ${w.characters.length + 1}`); w.characters.push(n); ui.sel = n.id; ui.tab = "build"; break; }
-    case "dup": { const n = JSON.parse(JSON.stringify(c)); n.id = uid(); n.name = c.name + " (copy)"; w.characters.splice(w.characters.indexOf(c) + 1, 0, n); ui.sel = n.id; break; }
-    case "del": ui.confirm = c.id; break;
+    case "goto": ui.sel = v; ui.tab = "build"; ui.confirm = null; window.scrollTo(0, 0); break;
+    case "add-char": { const n = newCharacter(cp ? "New recruit" : `Recruit ${w.characters.length + 1}`); if (cp) { Object.assign(n, { draft: true, cp: 0, injuries: [], status: "active" }); } w.characters.push(n); ui.sel = n.id; ui.tab = "build"; break; }
+    case "add-veh": { const n = newVehicle(`Vehicle ${w.vehicles.length + 1}`); if (cp) Object.assign(n, { draft: true, cp: 0, damage: [], status: "active" }); w.vehicles.push(n); ui.sel = n.id; ui.tab = "build"; break; }
+    case "dup": { const n = clone(u); n.id = uid(); n.name = u.name + " (copy)"; const list = isV(u) ? w.vehicles : w.characters; list.splice(list.indexOf(u) + 1, 0, n); ui.sel = n.id; break; }
+    case "del": ui.confirm = u.id; break;
     case "del-no": ui.confirm = null; break;
-    case "del-yes": { const i = w.characters.indexOf(c); w.characters.splice(i, 1); ui.sel = w.characters[Math.max(0, i - 1)]?.id ?? null; ui.confirm = null; break; }
+    case "del-yes": { const list = isV(u) ? w.vehicles : w.characters; const i = list.indexOf(u); list.splice(i, 1); ui.sel = (list[Math.max(0, i - 1)] || firstUnit())?.id ?? null; ui.confirm = null; break; }
+    case "photo-del": u.photo = null; break;
+    // character
     case "squad": c.squad = b.checked; if (c.squad && c.size < RULES.squadMin) c.size = RULES.squadMin; break;
     case "size": c.size = Math.min(RULES.squadMax, Math.max(RULES.squadMin, c.size + +v)); break;
     case "skill": { const k = b.dataset.k; c.skills[k] = Math.min(RULES.skillMax, Math.max(RULES.skillMin, c.skills[k] + +v)); break; }
-    case "hp": c.hp = Math.max(RULES.hpMin, c.hp + +v * RULES.hpStep); break;
-    case "trait": c.traits = c.traits.includes(v) ? c.traits.filter(x => x !== v) : [...c.traits, v]; break;
+    case "hp": { const step = cp && !c.draft ? CAMPAIGN.hpStep : RULES.hpStep; c.hp = Math.max(RULES.hpMin, c.hp + +v * step); break; }
+    case "trait": c.traits = toggleIn(c.traits, v); break;
     case "tmode": ui.traitMode = v; break;
-    case "abil": c.abilities = c.abilities.includes(v) ? c.abilities.filter(x => x !== v) : [...c.abilities, v]; break;
+    case "abil": c.abilities = toggleIn(c.abilities, v); break;
     case "wmode": ui.weapMode = v; break;
     case "wadd": { const ex = c.weapons.find(x => x.id === v); if (ex) ex.qty++; else c.weapons.push({ id: v, qty: 1 }); toast(`${weaponById(v).name} added`); break; }
     case "wqty": { const x = c.weapons[+b.dataset.i]; x.qty += +v; if (x.qty <= 0) c.weapons.splice(+b.dataset.i, 1); break; }
     case "armour": c.armour = v; break;
-    case "photo-del": c.photo = null; break;
     case "iqty": { const q = Math.max(0, (c.items[v] || 0) + +b.dataset.d); if (q) c.items[v] = q; else delete c.items[v]; break; }
-    case "cwrule": ui.cw.rules = ui.cw.rules.includes(v) ? ui.cw.rules.filter(x => x !== v) : [...ui.cw.rules, v]; break;
+    // vehicle
+    case "vskill": { const k = b.dataset.k; vv.skills[k] = Math.min(VEHICLE.skillMax, Math.max(VEHICLE.skillStart, vv.skills[k] + +v)); break; }
+    case "vtype": vv.type = v; break;
+    case "brush": ui.brush = v; break;
+    case "cell": {
+      const cur = vv.cells[v], merc = vv.traits.includes("Mercenary");
+      if (cur === "engine" || (cur === "crew-core" && !merc)) { toast(cur === "engine" ? "The engine is a core section and can't be removed" : "The crew is a core section. The Mercenary trait lets you replace it."); return; }
+      if (ui.brush === "erase" || cur === ui.brush) { delete vv.cells[v]; delete vv.mounts[v]; }
+      else { vv.cells[v] = ui.brush; if (!SECT[ui.brush].mount) delete vv.mounts[v]; }
+      break;
+    }
+    case "vtrait": {
+      vv.traits = toggleIn(vv.traits, v);
+      if (v === "Mercenary" && !vv.traits.includes("Mercenary")) { vv.cells["2-3"] = "crew-core"; delete vv.mounts["2-3"]; }
+      break;
+    }
+    case "vabil": vv.abilities = toggleIn(vv.abilities, v); break;
+    // campaign
+    case "camp-start": startCampaign(); toast("Campaign started"); break;
+    case "camp-end": ui.confirm = "camp-end"; break;
+    case "camp-end-yes": endCampaign(); ui.confirm = null; ui.rec = null; toast("Campaign ended"); break;
+    case "pay": payPending(unitById(v)); break;
+    case "undo": undoPending(unitById(v)); break;
+    case "rec-open": ui.rec = { u: {} }; break;
+    case "rec-close": ui.rec = null; break;
+    case "rec-save": saveRecord(); break;
+    case "inj-roll": applyInjury(unitById(v), roll(8)); break;
+    case "inj-pick": applyInjury(unitById(v), +$(`#pick-${v}`).value); break;
+    case "vdmg-roll": applyVDamage(unitById(v), roll(6)); break;
+    case "vdmg-pick": applyVDamage(unitById(v), +$(`#pick-${v}`).value); break;
+    case "heal": {
+      const t = unitById(v), cost = isV(t) ? CAMPAIGN.vFixCP : CAMPAIGN.healCP;
+      if ((t.cp || 0) < cost) { toast(`${t.name} needs ${cost} CP to ${isV(t) ? "fix" : "heal"} this`); return; }
+      const list = isV(t) ? t.damage : t.injuries; const i = list.findIndex(x => x.id === b.dataset.i);
+      const [gone1] = list.splice(i, 1); t.cp -= cost; logLine(`${t.name}: ${isV(t) ? "fixed" : "healed"} ${gone1.name} for ${cost} CP.`); break;
+    }
+    case "agenda-roll": { const t = unitById(v); const n = roll(6); t.agenda = { n, fails: 0 }; logLine(`${t.name} took a hidden agenda.`); toast(`${t.name}: ${AGENDAS[n - 1].name}`); break; }
+    case "agenda-drop": unitById(v).agenda = null; break;
+    case "convert": {
+      const t = unitById(v), merc = t.traits.includes("Mercenary"), rate = merc ? 1 : CAMPAIGN.cpPerCredit;
+      let n = parseInt($(`#conv-${v}`).value, 10) || 0; n = n - (n % rate);
+      if (n <= 0) { toast(merc ? "Enter how many CP to convert" : "Enter an even number of CP (2 CP = 1 credit)"); return; }
+      if (n > (t.cp || 0)) { toast(`${t.name} only has ${t.cp || 0} CP`); return; }
+      t.cp -= n; cp.credits += n / rate; logLine(`${t.name} converted ${n} CP into ${n / rate} credits.`); break;
+    }
+    case "cr-adj": { const n = parseInt($("#cr-adj").value, 10); if (!n) { toast("Enter an amount, like 12 or -5"); return; } cp.credits = Math.max(0, cp.credits + n); logLine(`Credits adjusted by ${sgn(n)}.`); break; }
+    case "pool-give": {
+      const t = unitById($("#pool-to").value), n = parseInt($("#pool-amt").value, 10) || 0;
+      if (!t || n <= 0) { toast("Pick who gets the points and how many"); return; }
+      if (n > cp.pool) { toast(`The pool only has ${cp.pool} CP`); return; }
+      cp.pool -= n; t.cp = (t.cp || 0) + n; logLine(`${n} CP from the pool to ${t.name}.`); break;
+    }
+    case "squad-lose": { const t = unitById(v); t.size -= 1; if (t.snap) t.snap = buildOf(t); logLine(`${t.name} lost a member for good (${t.size} left).${t.size < RULES.squadMin ? " Fewer than 3: they now act as independent characters." : ""}`); break; }
+    case "replace": { const dead = unitById(v); const n = newCharacter(`Replacement for ${dead.name}`); Object.assign(n, { draft: true, waived: true, cp: 0, injuries: [], status: "active" }); w.characters.push(n); ui.sel = n.id; ui.tab = "build"; break; }
+    case "remove-gone": { const t = unitById(v); const list = isV(t) ? w.vehicles : w.characters; list.splice(list.indexOf(t), 1); if (ui.sel === v) ui.sel = firstUnit()?.id ?? null; break; }
+    // custom weapons
+    case "cwrule": ui.cw.rules = toggleIn(ui.cw.rules, v); break;
     case "cwsave": {
       const f = ui.cw, k = cwCost(f);
       if (!f.name.trim()) { toast("Give the weapon a name first"); $("#cw-name")?.focus(); return; }
       if (!maxDamage(f.dmg)) { toast("Damage needs dice, like 2D6+2"); $("#cw-dmg")?.focus(); return; }
-      w.customWeapons = w.customWeapons || [];
       w.customWeapons.push({ id: "cw-" + uid(), custom: true, name: f.name.trim(), type: [f.kind, ...f.keywords.split(",").map(s => s.trim()).filter(Boolean)].join(", "),
         hands: f.oneHanded ? 1 : 2, dmg: f.dmg.toUpperCase().replace(/\s+/g, ""), rules: [...f.rules], ammo: f.rules.includes("Reload") ? f.ammo : undefined, range: f.kind === "Melee" ? 0 : +f.range || 0, cost: k.total });
       toast(`${f.name.trim()} forged for ${k.total} credits`); ui.cw = blankCW(); break;
     }
-    case "cwdel": w.customWeapons = w.customWeapons.filter(x => x.id !== v); w.characters.forEach(cc => cc.weapons = cc.weapons.filter(x => x.id !== v)); break;
-    case "wb-new": { const n = newWarband(); db.warbands[n.id] = n; db.current = n.id; ui.sel = null; ui.tab = "build"; break; }
-    case "wb-open": db.current = v; ui.sel = wb().characters[0]?.id ?? null; ui.tab = "build"; break;
+    case "cwdel": w.customWeapons = w.customWeapons.filter(x => x.id !== v); w.characters.forEach(cc => cc.weapons = cc.weapons.filter(x => x.id !== v)); w.vehicles.forEach(x => Object.keys(x.mounts).forEach(k => { if (x.mounts[k] === v) delete x.mounts[k]; })); break;
+    // saved
+    case "wb-new": { const n = newWarband(); db.warbands[n.id] = n; db.current = n.id; ui.sel = null; ui.tab = "build"; ui.rec = null; break; }
+    case "wb-open": db.current = v; ui.sel = firstUnit()?.id ?? null; ui.tab = "build"; ui.rec = null; break;
     case "wb-del": ui.confirm = "wb:" + v; break;
     case "wb-del-yes": {
       delete db.warbands[v]; ui.confirm = null;
       if (!Object.keys(db.warbands).length) { const n = newWarband(); db.warbands[n.id] = n; }
-      if (!db.warbands[db.current]) { db.current = Object.keys(db.warbands)[0]; ui.sel = wb().characters[0]?.id ?? null; }
+      if (!db.warbands[db.current]) { db.current = Object.keys(db.warbands)[0]; ui.sel = firstUnit()?.id ?? null; }
       break;
     }
     case "wb-copy": {
@@ -1047,9 +1845,10 @@ document.addEventListener("click", e => {
       try {
         const d = JSON.parse($("#import-box").value);
         if (!d || !Array.isArray(d.characters)) throw 0;
-        d.id = uid(); d.updated = Date.now(); d.limit = +d.limit || RULES.defaultLimit; d.customWeapons = d.customWeapons || [];
-        d.characters.forEach(cc => { cc.id = cc.id || uid(); cc.items = cc.items || {}; cc.weapons = cc.weapons || []; cc.traits = (cc.traits || []).filter(n => TRAIT[n]); cc.abilities = (cc.abilities || []).filter(n => ABIL[n]); });
-        db.warbands[d.id] = d; db.current = d.id; ui.sel = d.characters[0]?.id ?? null; ui.tab = "build"; toast(`Loaded ${d.name}`);
+        d.id = uid(); d.updated = Date.now(); d.limit = +d.limit || RULES.defaultLimit;
+        migrate(d);
+        d.characters.forEach(cc => { cc.id = cc.id || uid(); cc.traits = cc.traits.filter(n => TRAIT[n]); cc.abilities = cc.abilities.filter(n => ABIL[n]); });
+        db.warbands[d.id] = d; db.current = d.id; ui.sel = firstUnit()?.id ?? null; ui.tab = "build"; toast(`Loaded ${d.name}`);
       } catch (err) { toast("That text isn't a warband from this builder"); return; }
       break;
     }
@@ -1059,17 +1858,24 @@ document.addEventListener("click", e => {
 });
 
 document.addEventListener("input", e => {
-  const el = e.target, w = wb(), c = ch();
+  const el = e.target, w = wb(), u = sel();
   if (el.dataset.bind) {
     if (el.dataset.bind === "wb-name") w.name = el.value;
     if (el.dataset.bind === "wb-limit") w.limit = Math.max(0, parseInt(el.value, 10) || 0);
-    if (el.dataset.bind === "c-name") { c.name = el.value; const r = document.querySelector(`.rcard[aria-current="true"] .nm`); if (r && r.firstChild) r.firstChild.textContent = el.value || "Unnamed"; }
-    if (el.dataset.bind === "c-bg") c.background = el.value;
+    if (el.dataset.bind === "c-name") { u.name = el.value; const r = document.querySelector(`.rcard[aria-current="true"] .nm`); if (r && r.firstChild) r.firstChild.textContent = el.value || "Unnamed"; }
+    if (el.dataset.bind === "c-bg") u.background = el.value;
     save(); refreshLight(); return;
   }
   if (el.dataset.filter) {
     if (el.dataset.filter === "trait") ui.traitFilter = el.value; else ui.weapFilter = el.value;
     applyFilter(el.dataset.filter); return;
+  }
+  if (el.dataset.rec) {
+    const [id, f] = el.dataset.rec.split(":");
+    ui.rec.u[id] = ui.rec.u[id] || {};
+    ui.rec.u[id][f] = el.type === "checkbox" ? el.checked : el.value;
+    if (f === "killed" && el.checked) { const s = document.getElementById(`rec-${id}-surv`); if (s) { s.checked = false; ui.rec.u[id].surv = false; } const uw = document.getElementById(`rec-${id}-unw`); if (uw) { uw.checked = false; ui.rec.u[id].unw = false; } }
+    return;
   }
   if (el.dataset.cw) {
     const key = el.dataset.cw;
@@ -1079,11 +1885,14 @@ document.addEventListener("input", e => {
   }
 });
 document.addEventListener("change", e => {
-  if (e.target.dataset.photo) { setPhoto(e.target.files[0]); e.target.value = ""; return; } if (e.target.dataset.cw === "kind" || e.target.dataset.cw === "ammo") { ui.cw[e.target.dataset.cw] = e.target.value; render(); } });
-
+  if (e.target.dataset.photo) { setPhoto(e.target.files[0]); e.target.value = ""; return; }
+  if (e.target.dataset.mount) { const v = veh(); if (e.target.value) v.mounts[e.target.dataset.mount] = e.target.value; else delete v.mounts[e.target.dataset.mount]; save(); render(); return; }
+  if (e.target.dataset.cw === "kind" || e.target.dataset.cw === "ammo") { ui.cw[e.target.dataset.cw] = e.target.value; render(); }
+});
 document.addEventListener("dragover", e => { const d = e.target.closest("[data-drop]"); if (d) { e.preventDefault(); d.firstElementChild.classList.add("drop"); } });
 document.addEventListener("dragleave", e => { const d = e.target.closest("[data-drop]"); if (d) d.firstElementChild.classList.remove("drop"); });
 document.addEventListener("drop", e => { const d = e.target.closest("[data-drop]"); if (d) { e.preventDefault(); setPhoto(e.dataTransfer.files[0]); } });
 
-load(); render(); applyFilter("trait"); applyFilter("weap");
+load(); render();
 </script>
+
