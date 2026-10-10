@@ -1,0 +1,1023 @@
+<title>Planet 28 Warband Builder</title>
+<meta name="description" content="Build Planet 28 (2nd edition) warbands: points, traits, abilities, equipment, squads, custom weapons and character sheets.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: personnel-file console. Sticky points strip on top, roster rail on the left, dossier editor on the right; stacks on phones. */
+:root {
+  --bg: #E7EAEE;
+  --panel: #F6F7F9;
+  --panel-2: #EEF1F4;
+  --ink: #18202C;
+  --muted: #586274;
+  --line: #C6CDD7;
+  --accent: #B8460F;
+  --accent-soft: #F3DCCD;
+  --accent-ink: #FFFFFF;
+  --good: #2C7A4B;
+  --warn: #9A6412;
+  --bad: #B42318;
+  --font-display: "Saira Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --r: 6px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E1218; --panel: #161B24; --panel-2: #1C2230; --ink: #E4E8EE; --muted: #8E98AA;
+    --line: #2A3242; --accent: #F0883A; --accent-soft: #3A2516; --accent-ink: #1A0F06;
+    --good: #52C48A; --warn: #E2A84A; --bad: #F2705F; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0E1218; --panel: #161B24; --panel-2: #1C2230; --ink: #E4E8EE; --muted: #8E98AA;
+  --line: #2A3242; --accent: #F0883A; --accent-soft: #3A2516; --accent-ink: #1A0F06;
+  --good: #52C48A; --warn: #E2A84A; --bad: #F2705F; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { background: var(--bg); color: var(--ink); }
+body { font-family: var(--font-body); font-size: 15px; line-height: 1.5; padding-inline: 16px; padding-block: 0 48px; }
+button, input, select, textarea { font: inherit; color: inherit; }
+h1, h2, h3 { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .04em; margin: 0; text-wrap: balance; }
+.num, .mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+.wrap { max-width: 1240px; margin: 0 auto; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ---------- top strip ---------- */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); border-bottom: 1px solid var(--line); margin-inline: -16px; padding: 12px 16px 10px; }
+.top-inner { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; justify-content: space-between; max-width: 1240px; margin: 0 auto; }
+.brand { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+.brand h1 { font-size: 30px; line-height: 1; font-weight: 700; letter-spacing: .06em; }
+.brand h1 span { color: var(--accent); }
+.brand .sub { font-family: var(--font-display); font-size: 16px; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); }
+.meter { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.meter .pts { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 22px; font-weight: 500; white-space: nowrap; }
+.meter .pts small { font-size: 13px; color: var(--muted); }
+.meter .pts.over { color: var(--bad); }
+.bar { width: 180px; max-width: 40vw; height: 8px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 99px; overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--accent); }
+.bar.over i { background: var(--bad); }
+.credits { font-size: 13px; color: var(--muted); }
+.credits b { font-family: var(--font-mono); color: var(--ink); font-weight: 500; }
+
+.quote { max-width: 1240px; margin: 14px auto 0; font-style: italic; color: var(--muted); font-size: 14px; display: flex; gap: 10px; align-items: flex-start; }
+.quote::before { content: ""; flex: 0 0 3px; align-self: stretch; background: var(--accent); border-radius: 2px; opacity: .6; }
+.quote button { margin-left: auto; flex: none; }
+
+/* ---------- tabs ---------- */
+.tabs { display: flex; gap: 4px; margin: 16px auto 16px; max-width: 1240px; border-bottom: 1px solid var(--line); overflow-x: auto; }
+.tab { background: none; border: 0; padding: 8px 14px; font-family: var(--font-display); text-transform: uppercase; letter-spacing: .08em; font-size: 16px; color: var(--muted); border-bottom: 3px solid transparent; cursor: pointer; white-space: nowrap; }
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+
+/* ---------- controls ---------- */
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: var(--r); border: 1px solid var(--line); background: var(--panel); cursor: pointer; font-size: 14px; line-height: 1.2; }
+.btn:hover { border-color: var(--muted); }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+.btn.ghost { background: none; border-color: transparent; color: var(--muted); }
+.btn.ghost:hover { color: var(--ink); border-color: var(--line); }
+.btn.danger { color: var(--bad); }
+.btn.sm { padding: 3px 8px; font-size: 13px; }
+.field { display: grid; gap: 4px; }
+.field > span { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 500; }
+.input, select.input, textarea.input { width: 100%; padding: 7px 10px; border-radius: var(--r); border: 1px solid var(--line); background: var(--panel); }
+textarea.input { resize: vertical; min-height: 70px; }
+.input:focus { border-color: var(--accent); outline: none; }
+
+/* ---------- build layout ---------- */
+.build { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 20px; max-width: 1240px; margin: 0 auto; align-items: start; }
+@media (max-width: 860px) { .build { grid-template-columns: minmax(0, 1fr); } }
+
+.rail { display: grid; gap: 12px; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 96px); }
+@media (max-width: 860px) { .rail { position: static; } }
+.wb-head { display: grid; gap: 10px; padding: 14px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); }
+.wb-head .row { display: grid; grid-template-columns: 1fr 96px; gap: 8px; }
+.roster { display: grid; gap: 6px; }
+.rcard { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 2px 8px; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--r); background: var(--panel); cursor: pointer; text-align: left; width: 100%; }
+.rcard:hover { border-color: var(--muted); }
+.rcard[aria-current="true"] { border-color: var(--accent); box-shadow: inset 3px 0 0 var(--accent); }
+.rcard .nm { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rcard .c { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 14px; }
+.rcard .line { grid-column: 1 / -1; font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.pill { display: inline-block; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; padding: 1px 6px; border-radius: 99px; border: 1px solid var(--line); color: var(--muted); font-family: var(--font-body); vertical-align: 1px; margin-left: 4px; }
+.pill.acc { border-color: var(--accent); color: var(--accent); }
+.checks { display: grid; gap: 6px; padding: 12px 14px; border: 1px solid var(--line); border-radius: var(--r); background: var(--panel); font-size: 13px; }
+.chk { display: flex; gap: 8px; align-items: flex-start; }
+.dot { flex: none; width: 8px; height: 8px; border-radius: 50%; margin-top: 6px; background: var(--good); }
+.dot.warn { background: var(--warn); }
+.dot.bad { background: var(--bad); }
+
+/* ---------- dossier ---------- */
+.dossier { display: grid; gap: 16px; min-width: 0; }
+.sec { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; display: grid; gap: 14px; min-width: 0; }
+.sec-h { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.sec-h h2 { font-size: 20px; }
+.sec-h .tot { font-family: var(--font-mono); font-size: 14px; color: var(--muted); }
+.sec-h .tot b { color: var(--ink); font-weight: 500; }
+.intro { font-size: 14px; color: var(--muted); max-width: 70ch; margin: 0; }
+.id-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: end; }
+@media (max-width: 560px) { .id-grid { grid-template-columns: minmax(0,1fr); } }
+
+.stats { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
+@media (max-width: 760px) { .stats { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (max-width: 420px) { .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.stat { border: 1px solid var(--line); border-radius: var(--r); padding: 8px 6px 6px; display: grid; justify-items: center; gap: 2px; background: var(--panel-2); }
+.stat .lbl { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .1em; font-size: 13px; color: var(--muted); white-space: nowrap; }
+.stat .val { font-family: var(--font-mono); font-size: 26px; font-weight: 500; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.stat .val small { font-size: 13px; color: var(--muted); }
+.stat .ctl { display: flex; gap: 4px; }
+.stat .ctl button { width: 28px; height: 26px; border-radius: 4px; border: 1px solid var(--line); background: var(--panel); cursor: pointer; font-family: var(--font-mono); font-size: 15px; line-height: 1; }
+.stat .ctl button:disabled { opacity: .35; cursor: default; }
+.stat .ctl button:not(:disabled):hover { border-color: var(--accent); color: var(--accent); }
+.stat .cost { font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+.stat.fixed { background: none; border-style: dashed; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 4px 3px 10px; border-radius: 99px; background: var(--accent-soft); border: 1px solid transparent; font-size: 13px; }
+.chip .num { font-size: 12px; color: var(--muted); }
+.chip button { border: 0; background: none; cursor: pointer; width: 20px; height: 20px; border-radius: 50%; color: var(--muted); line-height: 1; }
+.chip button:hover { color: var(--bad); }
+.empty { font-size: 13px; color: var(--muted); font-style: italic; }
+
+.picker { border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+.picker-top { display: flex; gap: 8px; padding: 8px; border-bottom: 1px solid var(--line); background: var(--panel-2); align-items: center; flex-wrap: wrap; }
+.picker-top .input { flex: 1 1 180px; padding: 5px 9px; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+.seg button { border: 0; background: var(--panel); padding: 4px 10px; font-size: 13px; cursor: pointer; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--panel); }
+.list { max-height: 340px; overflow-y: auto; }
+.opt { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 10px; padding: 9px 12px; border-bottom: 1px solid var(--line); cursor: pointer; align-items: start; width: 100%; text-align: left; background: none; border-left: 0; border-right: 0; border-top: 0; }
+.opt:last-child { border-bottom: 0; }
+.opt:hover { background: var(--panel-2); }
+.opt .box { width: 18px; height: 18px; border: 1.5px solid var(--muted); border-radius: 4px; margin-top: 2px; display: grid; place-items: center; font-size: 12px; color: var(--accent-ink); }
+.opt.on .box { background: var(--accent); border-color: var(--accent); }
+.opt .t { font-weight: 600; }
+.opt .d { font-size: 13px; color: var(--muted); }
+.opt .cst { font-family: var(--font-mono); font-size: 14px; white-space: nowrap; }
+.neg { color: var(--good); }
+.opt.blocked { opacity: .5; }
+
+.eq-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.eq-wrap { overflow-x: auto; }
+.eq-table th { text-align: left; font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); padding: 6px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; background: var(--panel-2); position: sticky; top: 0; }
+.eq-table td { padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.eq-table tr:last-child td { border-bottom: 0; }
+.eq-table td.n { font-family: var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.eq-table td.nm { font-weight: 600; white-space: nowrap; }
+.eq-table .kw { font-size: 12px; color: var(--muted); }
+
+.carried { display: grid; gap: 6px; }
+.citem { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 10px; align-items: center; padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--panel-2); }
+.citem .nm { font-weight: 600; }
+.citem .meta { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.qty { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; background: var(--panel); }
+.qty button { border: 0; background: none; width: 26px; height: 26px; cursor: pointer; font-family: var(--font-mono); }
+.qty span { min-width: 24px; text-align: center; font-family: var(--font-mono); font-size: 13px; }
+.sub-h { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .08em; font-size: 15px; color: var(--muted); margin: 4px 0 -4px; }
+
+.armour-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; }
+.arm { text-align: left; padding: 9px 11px; border: 1px solid var(--line); border-radius: var(--r); background: var(--panel-2); cursor: pointer; display: grid; gap: 2px; }
+.arm:hover { border-color: var(--muted); }
+.arm[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.arm .t { font-weight: 600; display: flex; justify-content: space-between; gap: 8px; }
+.arm .t .num { font-weight: 400; font-size: 13px; }
+.arm .d { font-size: 12px; color: var(--muted); }
+
+.ledger { display: grid; gap: 4px; font-size: 14px; }
+.ledger div { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px dotted var(--line); padding-bottom: 3px; }
+.ledger div span:last-child { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.ledger .total { border-bottom: 0; font-weight: 600; padding-top: 6px; border-top: 1px solid var(--ink); font-size: 16px; }
+
+.toggle { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; user-select: none; }
+.toggle input { width: 16px; height: 16px; accent-color: var(--accent); }
+
+/* ---------- empty state ---------- */
+.blank { text-align: center; padding: 48px 20px; border: 1px dashed var(--line); border-radius: var(--r); display: grid; gap: 12px; justify-items: center; color: var(--muted); }
+
+/* ---------- sheets ---------- */
+.sheets { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr)); gap: 16px; max-width: 1240px; margin: 0 auto; }
+.sheet { background: var(--panel); border: 2px solid var(--ink); border-radius: 4px; padding: 14px 16px; display: grid; gap: 10px; break-inside: avoid; }
+.sheet-h { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; border-bottom: 2px solid var(--ink); padding-bottom: 6px; flex-wrap: wrap; }
+.sheet-h h3 { font-size: 22px; }
+.sheet-h .num { font-size: 14px; }
+.sstats { display: grid; grid-template-columns: repeat(7, 1fr); border: 1px solid var(--ink); }
+.sstats div { text-align: center; padding: 4px 2px; border-right: 1px solid var(--ink); }
+.sstats div:last-child { border-right: 0; }
+.sstats .k { font-family: var(--font-display); font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.sstats .v { font-family: var(--font-mono); font-size: 18px; font-weight: 500; }
+.sblock .k { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .08em; font-size: 14px; }
+.sblock ul { margin: 2px 0 0; padding-left: 18px; font-size: 13px; }
+.sblock li { margin-bottom: 2px; }
+.sblock p { margin: 2px 0 0; font-size: 13px; }
+.lines { height: 54px; background: repeating-linear-gradient(to bottom, transparent 0 17px, var(--line) 17px 18px); }
+.sheet .bg { font-style: italic; font-size: 13px; color: var(--muted); }
+.sheets-bar { max-width: 1240px; margin: 0 auto 16px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: center; }
+
+/* ---------- armoury & saved ---------- */
+.page { max-width: 1240px; margin: 0 auto; display: grid; gap: 16px; }
+.two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 860px) { .two { grid-template-columns: minmax(0, 1fr); } }
+.form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 480px) { .form-grid { grid-template-columns: minmax(0,1fr); } }
+.calc { font-family: var(--font-mono); font-size: 13px; background: var(--panel-2); border: 1px solid var(--line); border-radius: var(--r); padding: 10px 12px; display: grid; gap: 3px; }
+.calc div { display: flex; justify-content: space-between; gap: 8px; }
+.calc .total { border-top: 1px solid var(--line); padding-top: 5px; margin-top: 3px; font-weight: 500; font-size: 15px; }
+.saved { display: grid; gap: 8px; }
+.srow { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--r); background: var(--panel); }
+.srow[aria-current="true"] { border-color: var(--accent); }
+.srow .acts { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.note { font-size: 13px; color: var(--muted); }
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--panel); padding: 8px 14px; border-radius: var(--r); font-size: 14px; z-index: 50; }
+
+@media print {
+  .top, .tabs, .sheets-bar, .quote { display: none !important; }
+  body { background: #fff; color: #000; padding: 0; }
+  .sheets { grid-template-columns: 1fr 1fr; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<header class="top">
+  <div class="top-inner">
+    <div class="brand"><h1>Planet <span>28</span></h1><span class="sub">Warband builder</span></div>
+    <div class="meter" id="meter"></div>
+  </div>
+</header>
+<div class="quote" id="quote"></div>
+<nav class="tabs" role="tablist" id="tabs"></nav>
+<main id="app"></main>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+/* =====================================================================
+   RULES DATA — Planet 28, second edition (Mammoth Miniatures).
+   Page numbers refer to the printed book. Edit here to fix or add entries.
+   ===================================================================== */
+const RULES = {
+  baseCost: 10,          // p.23 every new character
+  skillCost: 10,         // p.23 per +1 skill
+  skillMin: 1, skillMax: 10,
+  hpStart: 20, hpStep: 2, hpStepCost: 10, hpMin: 2,
+  speed: 10,             // cm, cannot be bought
+  minCharacters: 2,
+  defaultLimit: 500,
+  squadMin: 3, squadMax: 10,
+};
+
+const SKILLS = [
+  { k: "A",  name: "Agility",   d: "How well a character moves and navigates their environment." },
+  { k: "S",  name: "Shooting",  d: "How well a character fights using ranged weapons and firearms." },
+  { k: "F",  name: "Fighting",  d: "How well a character fights in hand to hand combat." },
+  { k: "P",  name: "Psyche",    d: "How intelligent a character is, and how well they use or resist psychic powers." },
+  { k: "AW", name: "Awareness", d: "How well a character responds to their surroundings." },
+];
+
+// Character traits table, pp.64–67
+const TRAITS = [
+  ["Ammo smith", 15, "After each game this character may craft 1 piece of ammo for any weapon of their choice. This is automatically added to their equipment."],
+  ["Animal", -20, "This character may not use any abilities or perform shoot actions. This character suffers -1(P) during break tests."],
+  ["Armless", -20, "This character is missing an arm. They may only wield a single 1 handed weapon or use a single item at any time."],
+  ["Blessed", 50, "This character may roll 2D10 for all skill rolls and keep the lowest score."],
+  ["Big", 8, "This character gains an additional +1(F) when charging. This character suffers -3cm speed."],
+  ["Bulwark", 10, "Enemies do not receive the standard +1D4(F) when charging this character."],
+  ["Brawler", 9, "This character's fists do an additional +1D6 damage."],
+  ["Brave", 15, "This character may reroll 1 failed break test per turn."],
+  ["Barbaric", -10, "This character is immune to the Persuade ability. They may not wield any weapons or wear any armour with the keyword Complex."],
+  ["Cursed", -50, "This character must roll 2D10 for all skill rolls and keep the highest score."],
+  ["Coward", -15, "This character must make a break test when charged and may not charge any other character."],
+  ["Climber", 5, "This character gains +2(A) when attempting to climb any vertical surface."],
+  ["Death-proof", 25, "When rolling on the injuries table this character may treat Dead as Complete recovery."],
+  ["Extra limbs", 25, "This character may wield 4 Single handed weapons or 2 Double handed weapons at once."],
+  ["Engineer", 12, "When embarked in a vehicle this character automatically restores 1D4 hit-points per turn to any damaged sections in the same facing as the one from which they embarked."],
+  ["Fast", 6, "At the start of each turn, roll 1D6. Add this to this character's speed for that turn."],
+  ["Fearless", 12, "This character is immune to the effects of the Fearsome and Terrifying traits."],
+  ["Fearsome", 12, "Enemies wishing to charge this character must first pass a break test."],
+  ["Foul aura", 15, "Enemy characters receive 1 damage for every turn they spend in base contact with this character."],
+  ["Gigantic", 18, "This character gains all the effects of Big plus the following: not counted as being in cover unless completely obscured from sight; cannot be pushed back after combat; only takes fall damage from heights of 20cm or more."],
+  ["Gunner", 10, "When embarked in a vehicle this character may act as crew for the purpose of shooting, using their own shooting skill. They can only fire weapons on the same facing as the one from which they embarked."],
+  ["Gunslinger", 20, "This character may make shoot actions when locked in combat."],
+  ["Intelligent", 10, "This character may reroll one failed (AW) roll per turn."],
+  ["Incorporeal", 15, "This character may move through obstacles and other characters as if they were moving over even ground."],
+  ["Inspiring", 25, "Friendly characters within 10cm of this character receive +1 to their skills."],
+  ["Iron skin", 8, "This character may make an additional 1D4 armour roll whenever they take damage."],
+  ["Major arcana", 30, "This character may perform abilities from the arcana table. They may roll 3 random abilities at the start of each game, and may perform them as many times as they like during a game."],
+  ["Medic", 15, "This character may heal one injury from any friendly character in-between games. If they do, they may not do anything else between games."],
+  ["Mercenary", -5, "This character must be paid 10 credits before the start of each game or they may not join your warband for that game. This character may convert their campaign points for credits at a ratio of 1 to 1."],
+  ["Minor arcana", 18, "This character may perform abilities from the arcana table. They may roll 1 random ability at the start of each game, and may perform it as many times as they like during a game."],
+  ["Mysterious motives", 6, "At the start of each turn, roll 1D10. Treat this as the character's (A) for the purpose of activation."],
+  ["Painless", 25, "When rolling on the injuries table, this character treats all injuries except Death as Complete recovery."],
+  ["Pilot", 15, "When embarked in a vehicle that vehicle may use this character's agility and shooting values as its own."],
+  ["Psychic", 18, "This character may reroll a failed arcana ability once per turn."],
+  ["Rich", 28, "This character gains an additional 1D8 credits after each game."],
+  ["Rageful", -10, "This character may never leave combat. They will fight until they die or their opponent leaves/dies."],
+  ["Slow", -6, "At the start of each turn, roll 1D6. Remove this from this character's speed for that turn."],
+  ["Sniper", 17, "This character may reroll any failed Shooting rolls once."],
+  ["Sure-footed", 10, "This character treats rough ground as even ground and hazardous ground as rough ground."],
+  ["Stupid", -10, "This character must roll all (P) rolls twice, taking the worse result."],
+  ["Tank hunter", 15, "This character receives a +1 to their Shooting skill when making shoot actions against a vehicle."],
+  ["Terrifying", 30, "Enemies must pass a break test to charge, attack or shoot at this character. During off-table games any non-player characters will be hostile to this character, running away and refusing to engage with them."],
+  ["Unshakable", 25, "This character never needs to take a break test."],
+  ["Unbreakable conviction", 20, "This character is immune to the Persuade ability and the Mind control arcane power. All friendly characters within 10cm of them are also immune."],
+  ["Unearthly", 40, "This character can only be damaged by weapons with the keyword Psychic, Arcane or Demonic."],
+  ["Venal", -12, "This character must always convert spare campaign points into credits and may not save campaign points from one game to another."],
+  ["Zealot", 15, "Whenever this character takes damage, roll 1D10. On a roll of 10 this character gains +1 to their (F) and (A) skills for the remainder of the game, up to a maximum of 10."],
+].map(([name, cost, effect]) => ({ name, cost, effect }));
+
+// Character abilities table, pp.67–68
+const ABILITIES = [
+  ["Aimed shot", 10, "This character may use an action to aim their weapon at an enemy's weak spot. Their weapon does an additional +1D8 damage in their next attack this turn."],
+  ["Drain", 25, "This character may remove a single hit-point from any character within 5cm and add it to their own hit-points."],
+  ["Heal", 20, "This character may restore 1D6 hit-points to any other character in base contact."],
+  ["Haggle", 30, "This character may haggle the price of items in off-table games. Roll 1D6. On a 1, 2 or 3 the price is reduced by 1D4 credits. On a 4, 5 or 6 the price is reduced by 1D10. The price can never go below 1 credit."],
+  ["Inspire", 25, "A chosen friendly character within line of sight receives +1D6 to their skills for the remainder of the turn."],
+  ["Loot", 30, "Once per game, after this character slays an enemy in combat, they may take one piece of equipment from the defeated character and add it to their own. This equipment is permanently removed from the slain character's inventory."],
+  ["Persuade", 25, "When in combat, make a (P) roll. If successful, both characters break from combat. Neither character can attack the other for the remainder of the turn."],
+  ["Repair", 15, "When in base contact with a vehicle this character may restore 1D8 hit-points to any section, regardless of facing."],
+  ["Sabotage", 20, "When within 5cm of an enemy vehicle, choose a section of that vehicle from a random facing (1D4: 1 front, 2 right, 3 rear, 4 left). That section is treated as destroyed for 1D6 turns."],
+  ["Throw", 15, "This character can throw any character in base contact 1D12cm in a straight line, in a direction of their choosing. Characters thrown off ledges must take fall damage."],
+].map(([name, cost, effect]) => ({ name, cost, effect }));
+
+// Arcana table, pp.68–69 (rolled at the start of each game by Minor/Major arcana characters)
+const ARCANA = [
+  ["Blind", "Make a (P) roll. If successful all characters and vehicles within 15cm cannot make any actions for the remainder of the turn."],
+  ["Smite", "Select a character or vehicle within line of sight and make a (P) roll. If successful, that character takes 1D10+5 damage. Target may make an armour roll."],
+  ["Terrify", "Select a character within line of sight and make a (P) roll. If successful that character must immediately retreat to the nearest table edge as if they had failed a break test."],
+  ["Rend the earth", "Select a character within line of sight and make a (P) roll. If successful, all terrain within 20cm of that character counts as hazardous terrain for the rest of the game."],
+  ["Mind control", "Select a character within line of sight and make a (P) roll. If successful, the acting character may make one additional action with the chosen character."],
+  ["Wither", "Select a character within line of sight and make a (P) roll. If successful that character suffers -1D4 to their skills for 1D6 turns."],
+  ["Flame", "Make a (P) roll. If successful, 1 character in line of sight suffers 1D8 damage, and 1D4 more each turn until they use an action to extinguish it. Cannot be stopped by armour."],
+  ["Summon", "Select a character within line of sight and make a (P) roll. If successful place an exact duplicate of that character anywhere and control it for 1D4 turns. Cast at -2(P)."],
+  ["Shield", "Select a friendly character anywhere on the tabletop and make a (P) roll. If successful they may not be targeted by ranged or melee attacks for the rest of the turn."],
+  ["Teleport", "Make a (P) roll and select any part of the playing area within line of sight. If successful you may move this character there immediately."],
+  ["Dishearten", "Select a character within line of sight and make a (P) roll. If successful, that character acts last in the next turn, regardless of their (A) score."],
+  ["Immobilize", "Select a character within line of sight and make a (P) roll. If successful, that character may not move for 1D4 turns."],
+];
+
+// Weapon special rules tables, pp.76–77
+const SPECIALS = [
+  ["Armour piercing", 30, "Characters struck by this weapon may not make any armour rolls."],
+  ["Cumulative", 20, "For every successive turn in which a character is struck by this weapon, the weapon does an additional +4 damage."],
+  ["Explosive", 20, "Any character or vehicle within 5cm of a character hit by this weapon suffers 1D6 damage."],
+  ["Heavy", -10, "Characters wielding this weapon suffer -1 to their agility."],
+  ["Integral", -10, "This weapon cannot be removed during a game."],
+  ["Indirect", 30, "Estimate the distance to the target and place a marker; anything within 10cm of it is hit. Does not need line of sight."],
+  ["Poisonous", 40, "Any character hit by this weapon takes 1D4 damage at the start of every turn. This damage cannot be stopped with armour."],
+  ["Psychic", 25, "The wielder may use their (P) score when making shoot/fight actions with this weapon, instead of their (S) or (F)."],
+  ["Reload", -15, "After each attack the wielder must use an action to reload it, using 1 piece of ammo from their equipment."],
+  ["Volatile", -10, "If the user rolls a 10 on a skill roll with this weapon, it deals damage to the wielder rather than their target."],
+].map(([name, cost, effect]) => ({ name, cost, effect }));
+
+// Character weapons table, pp.74–75. hands: 1 or 2. range in cm (0 = melee). ammo: rough/basic/special.
+const WEAPONS = [
+  { id: "fist", name: "Fist", type: "Melee", hands: 1, dmg: "1D4-1", rules: [], range: 0, cost: 0 },
+  { id: "club", name: "Club", type: "Melee", hands: 1, dmg: "1D4", rules: [], range: 0, cost: 4 },
+  { id: "heavy-club", name: "Heavy club", type: "Melee", hands: 2, dmg: "1D6", rules: ["Heavy"], range: 0, cost: 6 },
+  { id: "dagger", name: "Dagger", type: "Melee", hands: 1, dmg: "1D4+3", rules: [], range: 0, cost: 5 },
+  { id: "power-sword", name: "Power sword", type: "Melee, Complex", hands: 1, dmg: "2D6", rules: [], range: 0, cost: 15 },
+  { id: "great-sword", name: "Great sword", type: "Melee", hands: 2, dmg: "2D6+6", rules: [], range: 0, cost: 20 },
+  { id: "power-fist", name: "Power fist", type: "Melee", hands: 1, dmg: "1D10+5", rules: ["Armour piercing", "Integral"], range: 0, cost: 30 },
+  { id: "electro-maul", name: "Electro maul", type: "Melee", hands: 2, dmg: "1D20", rules: ["Heavy", "Armour piercing"], range: 0, cost: 50 },
+  { id: "psy-staff", name: "Psy-staff", type: "Melee, Complex, Psychic", hands: 1, dmg: "2D8+2", rules: ["Psychic"], range: 0, cost: 35 },
+  { id: "flaming-torch", name: "Flaming torch", type: "Melee", hands: 1, dmg: "4D4", rules: ["Poisonous"], range: 0, cost: 15 },
+  { id: "primitive-pistol", name: "Primitive pistol", type: "Ranged", hands: 1, dmg: "2D4", rules: ["Reload"], ammo: "rough", range: 6, cost: 15 },
+  { id: "black-powder-rifle", name: "Black powder rifle", type: "Ranged", hands: 2, dmg: "2D4", rules: ["Reload"], ammo: "rough", range: 12, cost: 25 },
+  { id: "laser-pistol", name: "Laser pistol", type: "Ranged, Complex, Energy", hands: 1, dmg: "1D8", rules: [], range: 15, cost: 25 },
+  { id: "laser-rifle", name: "Laser rifle", type: "Ranged, Complex, Energy", hands: 2, dmg: "2D8", rules: [], range: 40, cost: 60 },
+  { id: "heavy-slug-pistol", name: "Heavy slug pistol", type: "Ranged, Ballistic", hands: 1, dmg: "3D6", rules: ["Reload"], ammo: "basic", range: 12, cost: 40 },
+  { id: "heavy-slug-rifle", name: "Heavy slug rifle", type: "Ranged, Ballistic", hands: 2, dmg: "3D6", rules: ["Reload"], ammo: "basic", range: 30, cost: 50 },
+  { id: "missile-launcher", name: "Missile launcher", type: "Ranged, Ballistic", hands: 2, dmg: "3D10+5", rules: ["Armour piercing", "Explosive", "Reload"], ammo: "special", range: 40, cost: 80 },
+  { id: "sniper-rifle", name: "Sniper rifle", type: "Ranged, Ballistic", hands: 2, dmg: "2D10", rules: [], range: 60, cost: 80 },
+  { id: "shotgun", name: "Shotgun", type: "Ranged, Ballistic", hands: 2, dmg: "3D8", rules: [], range: 20, cost: 50 },
+  { id: "plasma-rifle", name: "Plasma rifle", type: "Ranged, Complex, Energy", hands: 2, dmg: "1D12+5", rules: ["Armour piercing", "Volatile"], range: 25, cost: 60 },
+];
+
+// Character armour table, pp.77–78
+const ARMOUR = [
+  { id: "none", name: "No armour", def: "1D4-1", cost: 0, details: "" },
+  { id: "light", name: "Light armour", def: "1D6", cost: 10, details: "Provides no protection against weapons with the Energy keyword." },
+  { id: "ballistic", name: "Ballistic plate", def: "1D8+4", cost: 15, details: "" },
+  { id: "energy-shield", name: "Energy shield", def: "1D12+6", cost: 30, details: "Only protects against damage caused by weapons with the Energy keyword." },
+  { id: "psy-hood", name: "Psy-hood", def: "x", cost: 50, details: "The wearer cannot be targeted by arcane abilities or weapons with the Psychic keyword." },
+  { id: "heavy", name: "Heavy armour", def: "1D12", cost: 50, details: "The wearer suffers -1 to their agility during movement actions." },
+  { id: "living", name: "Living armour", def: "x", cost: 30, details: "A living being. Roll 1D20 at the start of each game for its hit-points; damage is removed from the armour first. Destroyed forever at 0." },
+  { id: "power", name: "Power armour", def: "2D10+5", cost: 100, details: "+1 agility. Immune to Poisonous and Cumulative. When struck by Energy weapons roll 1D10; on a 10 the wearer must spend a turn rebooting it." },
+];
+
+// Miscellaneous items table, p.79
+const ITEMS = [
+  { id: "ammo-rough", name: "Ammo - rough", cost: 2, d: "A single piece of rough ammo, enough for one shot." },
+  { id: "ammo-basic", name: "Ammo - basic", cost: 4, d: "A single piece of basic ammo, enough for one shot." },
+  { id: "ammo-special", name: "Ammo - special", cost: 7, d: "A single piece of special ammo, enough for one shot." },
+  { id: "med-kit", name: "Med kit", cost: 15, d: "When used, restores 5 hit-points." },
+  { id: "strange-idol", name: "Strange idol", cost: 25, d: "The owner may reroll a failed (P) roll in exchange for 1 hit-point." },
+  { id: "stimulants", name: "Stimulants", cost: 30, d: "+1 to all skills for 1D6 turns. Each successive use needs one more dose than the last." },
+  { id: "safety-deposit", name: "Safety deposit box", cost: 20, d: "Store items between games; they are not in the character's inventory during games." },
+  { id: "psyka", name: "Psyka", cost: 40, d: "Use a single arcane ability of your choice. After each use roll 1D10; lower than your total uses means addiction." },
+];
+
+// Flavour from the book
+const QUOTES = [
+  ["Oh, this? Picked this up from a mad, blind, one-handed gunsmith on a pirate cruiser somewhere out beyond the Deaths-head nebula. Honestly, I have no idea what it does - last time I fired it I woke up 2 days later, no clothes, surrounded by burnt corpses and about 300 frogs.", "Custom weapons"],
+  ["Flagships of the royal galactic court arrive to liberate the rebellious world of Brythe Prime - one atom blast at a time.", ""],
+  ["Across the galaxy there are countless private armies, paramilitaries, splinter empires and other armed factions vying for power. With enough money or a fearsome enough reputation, anyone can wage their own little war.", "Warlords, rebels, rogues"],
+  ["Not every character needs to be a faceless grizzled mercenary - perhaps they are a merchant marooned by star pirates and looking for a ship off world, or a scorned lover of some planetary official trying to kickstart a revolution as a dramatic act of revenge.", "Warband creation"],
+  ["The factory world of Lychester VII. After several weeks pursuing each other through the capital city's ancient sewers, two rival gangs finally run into each other.", "Scenarios"],
+  ["Your character will need some hardware if they plan on surviving for any length of time out in the wilds of deep space.", "Equipment"],
+  ["Credits and points may seem the same, but there may be times when your warband earns one and not the other, and you never know when you might run out of cash!", "Equipment"],
+];
+
+/* =====================================================================
+   HELPERS
+   ===================================================================== */
+const $ = (s, el = document) => el.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const uid = () => Math.random().toString(36).slice(2, 9);
+const sgn = n => (n > 0 ? "+" : n < 0 ? "−" : "") + Math.abs(n);
+const TRAIT = Object.fromEntries(TRAITS.map(t => [t.name, t]));
+const ABIL = Object.fromEntries(ABILITIES.map(a => [a.name, a]));
+const SPEC = Object.fromEntries(SPECIALS.map(s => [s.name, s]));
+const ARM = Object.fromEntries(ARMOUR.map(a => [a.id, a]));
+const ITEM = Object.fromEntries(ITEMS.map(i => [i.id, i]));
+
+// Max potential damage of a dice expression, e.g. "2D10+4" -> 24, "1D4-1" -> 3
+function maxDamage(expr) {
+  const s = String(expr).toUpperCase().replace(/\s+/g, "");
+  if (!s) return 0;
+  let total = 0, ok = false;
+  const re = /([+-]?)(\d*)D(\d+)|([+-]?)(\d+)/g;
+  let m;
+  while ((m = re.exec(s))) {
+    ok = true;
+    if (m[3]) total += (m[1] === "-" ? -1 : 1) * (parseInt(m[2] || "1", 10) * parseInt(m[3], 10));
+    else total += (m[4] === "-" ? -1 : 1) * parseInt(m[5], 10);
+  }
+  return ok ? total : 0;
+}
+
+/* =====================================================================
+   STATE
+   ===================================================================== */
+const STORE_KEY = "p28-builder-v1";
+let db = { current: null, warbands: {} };
+let ui = { tab: "build", sel: null, traitFilter: "", traitMode: "all", abilFilter: "", weapFilter: "", weapMode: "all", confirm: null, quote: 0, cw: null };
+
+function newCharacter(name = "New recruit") {
+  return { id: uid(), name, background: "", skills: { A: 1, S: 1, F: 1, P: 1, AW: 1 }, hp: 20, traits: [], abilities: [], weapons: [], armour: "none", items: {}, squad: false, size: 3 };
+}
+function newWarband(name = "Unnamed warband") {
+  return { id: uid(), name, limit: RULES.defaultLimit, characters: [], customWeapons: [], updated: Date.now() };
+}
+function exampleWarband() {
+  const w = newWarband("Lychester Sewer Rats (example)");
+  const a = newCharacter("Vex Marrow");
+  Object.assign(a, { background: "Gang boss of the lower sluices. Owes money to half the factory guilds and intends to pay none of it.",
+    skills: { A: 3, S: 4, F: 3, P: 1, AW: 3 }, hp: 20, traits: ["Brave", "Gunslinger"], abilities: ["Aimed shot"],
+    weapons: [{ id: "heavy-slug-pistol", qty: 1 }, { id: "dagger", qty: 1 }], armour: "ballistic", items: { "ammo-basic": 6 } });
+  const b = newCharacter("Old Pell");
+  Object.assign(b, { background: "A struck-off ship's surgeon who patches up the Rats for drink money. Runs at the first sign of trouble.",
+    skills: { A: 2, S: 1, F: 2, P: 3, AW: 2 }, hp: 20, traits: ["Medic", "Coward"], abilities: ["Heal"],
+    weapons: [{ id: "club", qty: 1 }], armour: "light", items: { "med-kit": 1 } });
+  const c = newCharacter("Sluice-runners");
+  Object.assign(c, { background: "Kids from the flood tunnels who know every pipe in Lychester.", skills: { A: 3, S: 2, F: 1, P: 1, AW: 1 }, hp: 16,
+    traits: ["Sure-footed"], weapons: [{ id: "primitive-pistol", qty: 1 }], armour: "none", items: { "ammo-rough": 3 }, squad: true, size: 3 });
+  w.characters = [a, b, c];
+  return w;
+}
+
+function load() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (raw) { const d = JSON.parse(raw); if (d && d.warbands) db = d; }
+  } catch (e) { /* storage unavailable */ }
+  if (!db.current || !db.warbands[db.current]) {
+    const ids = Object.keys(db.warbands);
+    if (ids.length) db.current = ids[0];
+    else { const w = exampleWarband(); db.warbands[w.id] = w; db.current = w.id; }
+  }
+  const w = wb();
+  ui.sel = w.characters[0]?.id ?? null;
+  ui.quote = Math.floor(Math.random() * QUOTES.length);
+}
+function save() {
+  const w = wb(); if (w) w.updated = Date.now();
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(db)); } catch (e) { /* ignore */ }
+}
+const wb = () => db.warbands[db.current];
+const ch = () => wb()?.characters.find(c => c.id === ui.sel);
+
+function weaponById(id, w = wb()) {
+  return WEAPONS.find(x => x.id === id) || (w?.customWeapons || []).find(x => x.id === id);
+}
+
+/* =====================================================================
+   COSTS & CHECKS
+   ===================================================================== */
+function costParts(c, w = wb()) {
+  const skills = SKILLS.reduce((s, k) => s + (c.skills[k.k] - 1) * RULES.skillCost, 0);
+  const hp = ((c.hp - RULES.hpStart) / RULES.hpStep) * RULES.hpStepCost;
+  const traits = c.traits.reduce((s, n) => s + (TRAIT[n]?.cost || 0), 0);
+  const abilities = c.abilities.reduce((s, n) => s + (ABIL[n]?.cost || 0), 0);
+  const weapons = c.weapons.reduce((s, x) => s + (weaponById(x.id, w)?.cost || 0) * x.qty, 0);
+  const armour = ARM[c.armour]?.cost || 0;
+  const items = Object.entries(c.items).reduce((s, [id, q]) => s + (ITEM[id]?.cost || 0) * q, 0);
+  const each = RULES.baseCost + skills + hp + traits + abilities + weapons + armour + items;
+  const models = c.squad ? c.size : 1;
+  return { base: RULES.baseCost, skills, hp, traits, abilities, weapons, armour, items, equipment: weapons + armour + items, each, models, total: each * models };
+}
+const charCost = c => costParts(c).total;
+function wbTotal(w = wb()) { return w.characters.reduce((s, c) => s + costParts(c, w).total, 0); }
+function modelCount(w = wb()) { return w.characters.reduce((s, c) => s + (c.squad ? c.size : 1), 0); }
+
+function speedOf(c) {
+  let s = RULES.speed; const notes = [];
+  if (c.traits.includes("Big") || c.traits.includes("Gigantic")) s -= 3;
+  if (c.traits.includes("Fast")) notes.push("+1D6");
+  if (c.traits.includes("Slow")) notes.push("−1D6");
+  return { s, notes };
+}
+function handsAvailable(c) {
+  if (c.traits.includes("Armless")) return 1;
+  if (c.traits.includes("Extra limbs")) return 4;
+  return 2;
+}
+function isComplex(item) { return /complex/i.test(item?.type || ""); }
+
+function charChecks(c) {
+  const out = [];
+  const t = n => c.traits.includes(n);
+  if (t("Big") && t("Gigantic")) out.push(["warn", "Gigantic already includes all the effects of Big, so Big is paying twice."]);
+  if (t("Blessed") && t("Cursed")) out.push(["warn", "Blessed and Cursed cancel out: one keeps the lowest of 2D10, the other the highest."]);
+  if (t("Fast") && t("Slow")) out.push(["warn", "Fast and Slow both roll 1D6 against speed each turn."]);
+  if (t("Brave") && t("Unshakable")) out.push(["warn", "Unshakable never takes break tests, so Brave's reroll does nothing."]);
+  if (t("Coward") && t("Unshakable")) out.push(["warn", "Coward forces break tests that Unshakable never takes. Check with your opponent."]);
+  if (t("Animal") && c.abilities.length) out.push(["bad", "Animal characters may not use any abilities."]);
+  if (t("Animal") && c.weapons.some(x => /ranged/i.test(weaponById(x.id)?.type || ""))) out.push(["bad", "Animal characters may not perform shoot actions, so ranged weapons are wasted."]);
+  if (t("Barbaric")) {
+    const bad = c.weapons.map(x => weaponById(x.id)).filter(isComplex).map(x => x.name);
+    if (bad.length) out.push(["bad", `Barbaric characters may not wield Complex weapons: ${bad.join(", ")}.`]);
+  }
+  if (t("Psychic") && !t("Minor arcana") && !t("Major arcana")) out.push(["warn", "Psychic rerolls failed arcana, but this character has no Minor or Major arcana."]);
+  if (t("Minor arcana") && t("Major arcana")) out.push(["warn", "Minor and Major arcana both taken. Major already rolls 3 abilities."]);
+  // hands
+  const hands = c.weapons.reduce((s, x) => s + (weaponById(x.id)?.hands || 1) * x.qty, 0);
+  const av = handsAvailable(c);
+  if (hands > av) out.push(["info", `Carrying ${hands} hands' worth of weapons with ${av} hand${av > 1 ? "s" : ""}. Swapping weapons takes an action.`]);
+  // ammo
+  const need = {};
+  c.weapons.forEach(x => { const w = weaponById(x.id); if (w?.rules?.includes("Reload")) need[w.ammo || "any"] = w.name; });
+  for (const [kind, wname] of Object.entries(need)) {
+    if (kind === "any") { if (!["ammo-rough", "ammo-basic", "ammo-special"].some(i => c.items[i])) out.push(["warn", `${wname} has Reload but the character carries no ammo.`]); }
+    else if (!c.items["ammo-" + kind]) out.push(["warn", `${wname} needs ${kind} ammo to reload, and the character carries none.`]);
+  }
+  if (c.hp < RULES.hpStart && c.hp <= 10) out.push(["info", `Only ${c.hp} hit-points. Skills drop by 1 once they lose half.`]);
+  if (c.squad && (c.size < RULES.squadMin || c.size > RULES.squadMax)) out.push(["bad", `Squads must have ${RULES.squadMin} to ${RULES.squadMax} members.`]);
+  return out;
+}
+function wbChecks(w = wb()) {
+  const out = [];
+  const total = wbTotal(w);
+  const models = modelCount(w);
+  if (models < RULES.minCharacters) out.push(["bad", `A warband needs at least ${RULES.minCharacters} characters (has ${models}).`]);
+  if (total > w.limit) out.push(["bad", `${total - w.limit} points over the ${w.limit} point limit.`]);
+  w.characters.forEach(c => charChecks(c).filter(x => x[0] === "bad").forEach(x => out.push(["bad", `${c.name || "Unnamed"}: ${x[1]}`])));
+  if (!out.length) out.push(["ok", "Warband is legal and ready to deploy."]);
+  return out;
+}
+
+/* =====================================================================
+   RENDER
+   ===================================================================== */
+function render() {
+  // keep scroll positions of inner lists
+  const keep = {};
+  document.querySelectorAll("[data-scroll]").forEach(el => keep[el.dataset.scroll] = el.scrollTop);
+  renderMeter(); renderQuote(); renderTabs();
+  const app = $("#app");
+  if (ui.tab === "build") app.innerHTML = viewBuild();
+  else if (ui.tab === "sheets") app.innerHTML = viewSheets();
+  else if (ui.tab === "armoury") app.innerHTML = viewArmoury();
+  else app.innerHTML = viewSaved();
+  applyFilter("trait"); applyFilter("weap");
+  document.querySelectorAll("[data-scroll]").forEach(el => { if (keep[el.dataset.scroll] != null) el.scrollTop = keep[el.dataset.scroll]; });
+}
+
+function renderMeter() {
+  const w = wb(), total = wbTotal(w), over = total > w.limit;
+  const pct = Math.min(100, (total / Math.max(1, w.limit)) * 100);
+  const left = w.limit - total;
+  $("#meter").innerHTML = `
+    <div class="pts num ${over ? "over" : ""}">${total} <small>/ ${w.limit} pts</small></div>
+    <div class="bar ${over ? "over" : ""}" role="img" aria-label="${Math.round(pct)}% of points spent"><i style="width:${pct}%"></i></div>
+    <div class="credits">${over ? `<b style="color:var(--bad)">${-left}</b> over` : `<b>${left}</b> left → credits`} · <b>${modelCount(w)}</b> models</div>`;
+}
+function renderQuote() {
+  const [q, src] = QUOTES[ui.quote];
+  $("#quote").innerHTML = `<div>“${esc(q)}”${src ? ` <span class="muted" style="font-style:normal">— ${esc(src)}</span>` : ""}</div><button class="btn ghost sm" data-act="quote" aria-label="Another quote">↻</button>`;
+}
+function renderTabs() {
+  const tabs = [["build", "Build"], ["sheets", "Character sheets"], ["armoury", "Custom weapons"], ["saved", "Saved warbands"]];
+  $("#tabs").innerHTML = tabs.map(([k, l]) => `<button class="tab" role="tab" aria-selected="${ui.tab === k}" data-act="tab" data-v="${k}">${l}</button>`).join("");
+}
+
+function viewBuild() {
+  const w = wb();
+  return `<div class="build">
+    <aside class="rail">
+      <div class="wb-head">
+        <div class="row">
+          <label class="field"><span>Warband</span><input class="input" id="wb-name" data-bind="wb-name" value="${esc(w.name)}"></label>
+          <label class="field"><span>Points</span><input class="input num" id="wb-limit" data-bind="wb-limit" type="number" min="0" step="50" value="${w.limit}"></label>
+        </div>
+      </div>
+      <div class="roster">
+        ${w.characters.map(c => {
+          const p = costParts(c);
+          return `<button class="rcard" data-act="select" data-v="${c.id}" aria-current="${c.id === ui.sel}">
+            <span class="nm">${esc(c.name || "Unnamed")}${c.squad ? `<span class="pill acc">Squad ×${c.size}</span>` : ""}</span>
+            <span class="c" data-cost="${c.id}">${p.total}</span>
+            <span class="line">A${c.skills.A} S${c.skills.S} F${c.skills.F} P${c.skills.P} AW${c.skills.AW} · ${c.hp}HP</span>
+          </button>`;
+        }).join("")}
+        <button class="btn primary" data-act="add-char" style="justify-content:center">+ Add character</button>
+      </div>
+      <div class="checks" id="wb-checks">${wbChecks().map(([lvl, m]) => `<div class="chk"><i class="dot ${lvl === "ok" ? "" : lvl === "bad" ? "bad" : "warn"}"></i><span>${esc(m)}</span></div>`).join("")}</div>
+    </aside>
+    <section class="dossier">${ch() ? viewChar(ch()) : viewBlank()}</section>
+  </div>`;
+}
+function viewBlank() {
+  return `<div class="blank"><h2>No characters yet</h2><p style="margin:0;max-width:46ch">Every character starts at 10 points with all skills at 1, 20 hit-points and a speed of 10cm. Your warband needs at least two.</p><button class="btn primary" data-act="add-char">+ Add your first character</button></div>`;
+}
+
+function viewChar(c) {
+  const p = costParts(c);
+  const sp = speedOf(c);
+  const checks = charChecks(c);
+  return `
+  <div class="sec">
+    <div class="sec-h"><h2>Background</h2>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn sm" data-act="dup">Duplicate</button>
+        ${ui.confirm === c.id ? `<button class="btn sm danger" data-act="del-yes">Confirm delete</button><button class="btn sm" data-act="del-no">Keep</button>` : `<button class="btn sm danger" data-act="del">Delete</button>`}
+      </div>
+    </div>
+    <div class="id-grid">
+      <label class="field"><span>Name</span><input class="input" id="c-name" data-bind="c-name" value="${esc(c.name)}"></label>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding-bottom:6px">
+        <label class="toggle"><input type="checkbox" id="c-squad" data-act="squad" ${c.squad ? "checked" : ""}> Squad</label>
+        ${c.squad ? `<div class="qty" aria-label="Squad size"><button data-act="size" data-v="-1" aria-label="Fewer members">−</button><span>${c.size}</span><button data-act="size" data-v="1" aria-label="More members">+</button></div><span class="note">members</span>` : ""}
+      </div>
+    </div>
+    <label class="field"><span>Who are they?</span><textarea class="input" id="c-bg" data-bind="c-bg" placeholder="Who are they, why are they part of this warband, what are their strengths and weaknesses?">${esc(c.background)}</textarea></label>
+    ${c.squad ? `<p class="intro">Squads move and act as one unit. Every member shares this profile and equipment, and the cost is the profile × members. If a squad drops to 2 members they become independent characters. At least 75% of members must carry the same weapons.</p>` : ""}
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><h2>Profile</h2><span class="tot">skills <b>${sgn(p.skills)}</b> · hit-points <b>${sgn(p.hp)}</b></span></div>
+    <div class="stats">
+      ${SKILLS.map(s => `<div class="stat" title="${esc(s.d)}">
+        <span class="lbl">${s.name.slice(0, 3)} (${s.k})</span>
+        <span class="val">${c.skills[s.k]}</span>
+        <span class="ctl"><button data-act="skill" data-k="${s.k}" data-v="-1" ${c.skills[s.k] <= RULES.skillMin ? "disabled" : ""} aria-label="Lower ${s.name}">−</button><button data-act="skill" data-k="${s.k}" data-v="1" ${c.skills[s.k] >= RULES.skillMax ? "disabled" : ""} aria-label="Raise ${s.name}">+</button></span>
+        <span class="cost">${(c.skills[s.k] - 1) * RULES.skillCost} pts</span>
+      </div>`).join("")}
+      <div class="stat">
+        <span class="lbl">Hit-points</span>
+        <span class="val">${c.hp}</span>
+        <span class="ctl"><button data-act="hp" data-v="-1" ${c.hp <= RULES.hpMin ? "disabled" : ""} aria-label="Lower hit-points">−</button><button data-act="hp" data-v="1" aria-label="Raise hit-points">+</button></span>
+        <span class="cost">${sgn(p.hp)} pts</span>
+      </div>
+      <div class="stat fixed" title="Speed cannot be changed with points.">
+        <span class="lbl">Speed</span>
+        <span class="val">${sp.s}<small>cm</small></span>
+        <span class="cost" style="margin-top:4px">${sp.notes.length ? sp.notes.join(" ") + " / turn" : "fixed"}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><h2>Traits</h2><span class="tot"><b>${sgn(p.traits)}</b> pts</span></div>
+    <div class="chips">${c.traits.length ? c.traits.map(n => `<span class="chip">${esc(n)} <span class="num ${TRAIT[n].cost < 0 ? "neg" : ""}">${sgn(TRAIT[n].cost)}</span><button data-act="trait" data-v="${esc(n)}" aria-label="Remove ${esc(n)}">×</button></span>`).join("") : `<span class="empty">No traits. Some traits have a negative cost and make the character cheaper.</span>`}</div>
+    <div class="picker">
+      <div class="picker-top">
+        <input class="input" id="f-trait" data-filter="trait" placeholder="Search traits…" value="${esc(ui.traitFilter)}">
+        <div class="seg">${[["all", "All"], ["pos", "Boons"], ["neg", "Drawbacks"]].map(([k, l]) => `<button data-act="tmode" data-v="${k}" aria-pressed="${ui.traitMode === k}">${l}</button>`).join("")}</div>
+      </div>
+      <div class="list" data-scroll="traits" id="list-trait">
+        ${[...TRAITS].sort((a, b) => a.name.localeCompare(b.name)).filter(t => ui.traitMode === "all" || (ui.traitMode === "pos" ? t.cost > 0 : t.cost < 0)).map(t => {
+          const on = c.traits.includes(t.name);
+          return `<button class="opt ${on ? "on" : ""}" data-act="trait" data-v="${esc(t.name)}" data-search="${esc((t.name + " " + t.effect).toLowerCase())}">
+            <span class="box">${on ? "✓" : ""}</span><span><span class="t">${esc(t.name)}</span><br><span class="d">${esc(t.effect)}</span></span><span class="cst ${t.cost < 0 ? "neg" : ""}">${sgn(t.cost)}</span></button>`;
+        }).join("")}
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><h2>Abilities</h2><span class="tot"><b>${sgn(p.abilities)}</b> pts</span></div>
+    <p class="intro">Abilities are unique actions a character performs in place of their normal actions.</p>
+    <div class="picker"><div class="list" data-scroll="abil">
+      ${ABILITIES.map(a => {
+        const on = c.abilities.includes(a.name);
+        return `<button class="opt ${on ? "on" : ""} ${c.traits.includes("Animal") && !on ? "blocked" : ""}" data-act="abil" data-v="${esc(a.name)}">
+          <span class="box">${on ? "✓" : ""}</span><span><span class="t">${esc(a.name)}</span><br><span class="d">${esc(a.effect)}</span></span><span class="cst">${sgn(a.cost)}</span></button>`;
+      }).join("")}
+    </div></div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><h2>Equipment</h2><span class="tot"><b>${p.equipment}</b> credits${c.squad ? " each" : ""}</span></div>
+    <p class="intro">During creation, points buy equipment 1 for 1 as credits. Anything left over when the warband is finished becomes credits.</p>
+
+    <div class="sub-h">Carried weapons</div>
+    <div class="carried">
+      ${c.weapons.length ? c.weapons.map((x, i) => {
+        const wp = weaponById(x.id);
+        if (!wp) return "";
+        return `<div class="citem"><div style="min-width:0"><div class="nm">${esc(wp.name)}${wp.custom ? `<span class="pill acc">Custom</span>` : ""}</div>
+          <div class="meta">${esc(wp.dmg)} · ${wp.range ? wp.range + "cm" : "melee"} · ${wp.hands === 2 ? "two" : "one"}-handed${wp.rules.length ? " · " + esc(wp.rules.join(", ")) : ""}</div></div>
+          <div class="qty"><button data-act="wqty" data-i="${i}" data-v="-1" aria-label="Fewer">−</button><span>${x.qty}</span><button data-act="wqty" data-i="${i}" data-v="1" aria-label="More">+</button></div>
+          <span class="num" style="min-width:42px;text-align:right">${wp.cost * x.qty}</span></div>`;
+      }).join("") : `<span class="empty">Unarmed. Every character always has their fists (1D4-1).</span>`}
+    </div>
+
+    <div class="picker">
+      <div class="picker-top">
+        <input class="input" id="f-weap" data-filter="weap" placeholder="Search weapons…" value="${esc(ui.weapFilter)}">
+        <div class="seg">${[["all", "All"], ["melee", "Melee"], ["ranged", "Ranged"]].map(([k, l]) => `<button data-act="wmode" data-v="${k}" aria-pressed="${ui.weapMode === k}">${l}</button>`).join("")}</div>
+      </div>
+      <div class="list eq-wrap" data-scroll="weap" style="max-height:300px">
+        <table class="eq-table">
+          <thead><tr><th>Weapon</th><th>Hands</th><th>Damage</th><th>Range</th><th>Special</th><th>Cost</th><th></th></tr></thead>
+          <tbody>
+          ${[...WEAPONS, ...(wb().customWeapons || [])].filter(wp => wp.id !== "fist" && (ui.weapMode === "all" || wp.type.toLowerCase().includes(ui.weapMode))).map(wp => `
+            <tr data-search="${esc((wp.name + " " + wp.type + " " + wp.rules.join(" ")).toLowerCase())}">
+              <td class="nm">${esc(wp.name)}${wp.custom ? `<span class="pill acc">Custom</span>` : ""}<div class="kw">${esc(wp.type)}</div></td>
+              <td class="n">${wp.hands}</td><td class="n">${esc(wp.dmg)}</td><td class="n">${wp.range ? wp.range + "cm" : "—"}</td>
+              <td>${wp.rules.length ? esc(wp.rules.join(", ")) + (wp.ammo ? `<div class="kw">Ammo: ${wp.ammo}</div>` : "") : "—"}</td>
+              <td class="n">${wp.cost}</td>
+              <td><button class="btn sm" data-act="wadd" data-v="${wp.id}">Add</button></td>
+            </tr>`).join("")}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="sub-h">Armour <span style="text-transform:none;letter-spacing:0;font-family:var(--font-body);font-size:13px">(one type only)</span></div>
+    <div class="armour-grid">
+      ${ARMOUR.map(a => `<button class="arm" data-act="armour" data-v="${a.id}" aria-pressed="${c.armour === a.id}">
+        <span class="t">${esc(a.name)} <span class="num">${a.cost}</span></span>
+        <span class="d"><span class="mono">Defence ${esc(a.def)}</span>${a.details ? " · " + esc(a.details) : ""}</span>
+      </button>`).join("")}
+    </div>
+
+    <div class="sub-h">Ammo &amp; items</div>
+    <div class="carried">
+      ${ITEMS.map(it => {
+        const q = c.items[it.id] || 0;
+        return `<div class="citem" style="${q ? "" : "background:none"}"><div style="min-width:0"><div class="nm">${esc(it.name)} <span class="num muted" style="font-weight:400;font-size:13px">${it.cost} cr</span></div><div class="d muted" style="font-size:13px">${esc(it.d)}</div></div>
+          <div class="qty"><button data-act="iqty" data-v="${it.id}" data-d="-1" ${q ? "" : "disabled"} aria-label="Fewer">−</button><span>${q}</span><button data-act="iqty" data-v="${it.id}" data-d="1" aria-label="More">+</button></div>
+          <span class="num" style="min-width:42px;text-align:right">${it.cost * q}</span></div>`;
+      }).join("")}
+    </div>
+  </div>
+
+  <div class="two">
+    <div class="sec">
+      <div class="sec-h"><h2>Points</h2></div>
+      <div class="ledger">
+        <div><span>Base cost</span><span>${p.base}</span></div>
+        <div><span>Skills</span><span>${p.skills}</span></div>
+        <div><span>Hit-points</span><span>${p.hp}</span></div>
+        <div><span>Traits</span><span>${p.traits}</span></div>
+        <div><span>Abilities</span><span>${p.abilities}</span></div>
+        <div><span>Weapons</span><span>${p.weapons}</span></div>
+        <div><span>Armour</span><span>${p.armour}</span></div>
+        <div><span>Ammo &amp; items</span><span>${p.items}</span></div>
+        ${c.squad ? `<div><span>Per member</span><span>${p.each}</span></div><div><span>Members</span><span>× ${p.models}</span></div>` : ""}
+        <div class="total"><span>${c.squad ? "Squad total" : "Character total"}</span><span>${p.total}</span></div>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="sec-h"><h2>Notes</h2></div>
+      <div style="display:grid;gap:8px;font-size:14px">
+        ${checks.length ? checks.map(([lvl, m]) => `<div class="chk"><i class="dot ${lvl === "bad" ? "bad" : lvl === "warn" ? "warn" : ""}"></i><span>${esc(m)}</span></div>`).join("") : `<div class="chk"><i class="dot"></i><span>Nothing to flag on this character.</span></div>`}
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ---------- sheets ---------- */
+function viewSheets() {
+  const w = wb();
+  if (!w.characters.length) return `<div class="page">${viewBlank()}</div>`;
+  return `<div class="sheets-bar"><h2 style="font-size:22px">${esc(w.name)}</h2><span class="note">${wbTotal(w)} / ${w.limit} pts · ${modelCount(w)} models · Hosted outside Claude, Ctrl/Cmd+P prints these sheets.</span></div>
+  <div class="sheets">${w.characters.map(c => {
+    const p = costParts(c), sp = speedOf(c);
+    const arcana = c.traits.includes("Minor arcana") || c.traits.includes("Major arcana");
+    const eq = [
+      ...c.weapons.map(x => { const wp = weaponById(x.id); return wp ? `${x.qty > 1 ? x.qty + "× " : ""}<b>${esc(wp.name)}</b> <span class="mono">${esc(wp.dmg)}${wp.range ? " · " + wp.range + "cm" : ""}</span>${wp.rules.length ? " · " + esc(wp.rules.join(", ")) : ""}` : ""; }),
+      `<b>${esc(ARM[c.armour].name)}</b> <span class="mono">def ${esc(ARM[c.armour].def)}</span>`,
+      ...Object.entries(c.items).filter(([, q]) => q).map(([id, q]) => `${q}× ${esc(ITEM[id].name)}`),
+    ];
+    return `<article class="sheet">
+      <div class="sheet-h"><h3>${esc(c.name || "Unnamed")}${c.squad ? ` <span class="pill acc">Squad ×${c.size}</span>` : ""}</h3><span class="num">Points cost: <b>${p.total}</b>${c.squad ? ` <span class="muted">(${p.each} each)</span>` : ""}</span></div>
+      ${c.background ? `<div class="bg">${esc(c.background)}</div>` : ""}
+      <div class="sstats">
+        ${SKILLS.map(s => `<div><div class="k">${s.name}</div><div class="v">${c.skills[s.k]}</div></div>`).join("")}
+        <div><div class="k">Speed</div><div class="v">${sp.s}<span style="font-size:11px">cm</span></div></div>
+        <div><div class="k">HP</div><div class="v">${c.hp}</div></div>
+      </div>
+      <div class="sblock"><div class="k">Traits</div>${c.traits.length ? `<ul>${c.traits.map(n => `<li><b>${esc(n)}.</b> ${esc(TRAIT[n].effect)}</li>`).join("")}</ul>` : `<p class="muted">None</p>`}</div>
+      <div class="sblock"><div class="k">Abilities</div>${c.abilities.length ? `<ul>${c.abilities.map(n => `<li><b>${esc(n)}.</b> ${esc(ABIL[n].effect)}</li>`).join("")}</ul>` : `<p class="muted">None</p>`}</div>
+      ${arcana ? `<div class="sblock"><div class="k">Arcana (roll 1D12 per ability)</div><p>${ARCANA.map((a, i) => `<span class="mono">${i + 1}</span> ${esc(a[0])}`).join(" · ")}</p></div>` : ""}
+      <div class="sblock"><div class="k">Equipment</div><ul>${eq.filter(Boolean).map(e => `<li>${e}</li>`).join("")}</ul></div>
+      <div class="two" style="gap:12px">
+        <div class="sblock"><div class="k">Injuries</div><div class="lines"></div></div>
+        <div class="sblock"><div class="k">Campaign points</div><div class="lines"></div></div>
+      </div>
+    </article>`;
+  }).join("")}</div>`;
+}
+
+/* ---------- custom weapons ---------- */
+function blankCW() { return { name: "", kind: "Ranged", keywords: "", dmg: "2D6", range: 20, oneHanded: false, rules: [], ammo: "basic" }; }
+function cwCost(f) {
+  const md = maxDamage(f.dmg), rng = f.kind === "Melee" ? 0 : Math.max(0, +f.range || 0);
+  const oh = f.oneHanded ? 10 : 0;
+  const sp = f.rules.reduce((s, n) => s + (SPEC[n]?.cost || 0), 0);
+  return { md, rng, oh, sp, total: md + rng + oh + sp };
+}
+function viewArmoury() {
+  if (!ui.cw) ui.cw = blankCW();
+  const f = ui.cw, k = cwCost(f), w = wb();
+  return `<div class="page"><div class="two">
+    <div class="sec">
+      <div class="sec-h"><h2>Forge a weapon</h2></div>
+      <p class="intro">Cost = maximum damage + range in cm (melee is 0). Weapons are two-handed by default; one-handed adds 10 credits. Then add any special rules. Talk it through with your opponent before the game.</p>
+      <div class="form-grid">
+        <label class="field" style="grid-column:1/-1"><span>Name</span><input class="input" id="cw-name" data-cw="name" value="${esc(f.name)}" placeholder="Frog-summoner"></label>
+        <label class="field"><span>Type</span><select class="input" id="cw-kind" data-cw="kind">${["Ranged", "Melee"].map(o => `<option ${f.kind === o ? "selected" : ""}>${o}</option>`).join("")}</select></label>
+        <label class="field"><span>Extra keywords</span><input class="input" id="cw-kw" data-cw="keywords" value="${esc(f.keywords)}" placeholder="Energy, Complex"></label>
+        <label class="field"><span>Damage dice</span><input class="input num" id="cw-dmg" data-cw="dmg" value="${esc(f.dmg)}" placeholder="2D10+4"></label>
+        <label class="field"><span>Range (cm)</span><input class="input num" id="cw-range" data-cw="range" type="number" min="0" value="${f.kind === "Melee" ? 0 : f.range}" ${f.kind === "Melee" ? "disabled" : ""}></label>
+        <label class="toggle" style="grid-column:1/-1"><input type="checkbox" id="cw-oh" data-cw="oneHanded" ${f.oneHanded ? "checked" : ""}> One-handed (+10)</label>
+      </div>
+      <div class="sub-h">Special rules</div>
+      <div class="picker"><div class="list" data-scroll="cwspec" style="max-height:260px">
+        ${SPECIALS.map(s => { const on = f.rules.includes(s.name); return `<button class="opt ${on ? "on" : ""}" data-act="cwrule" data-v="${esc(s.name)}"><span class="box">${on ? "✓" : ""}</span><span><span class="t">${esc(s.name)}</span><br><span class="d">${esc(s.effect)}</span></span><span class="cst ${s.cost < 0 ? "neg" : ""}">${sgn(s.cost)}</span></button>`; }).join("")}
+      </div></div>
+      ${f.rules.includes("Reload") ? `<label class="field"><span>Ammo type</span><select class="input" id="cw-ammo" data-cw="ammo">${["rough", "basic", "special"].map(o => `<option ${f.ammo === o ? "selected" : ""}>${o}</option>`).join("")}</select></label>` : ""}
+      <div class="calc" id="cw-calc">${cwCalc(k)}</div>
+      <div><button class="btn primary" data-act="cwsave">Add to warband armoury</button></div>
+    </div>
+    <div class="sec">
+      <div class="sec-h"><h2>${esc(w.name)} armoury</h2></div>
+      ${(w.customWeapons || []).length ? `<div class="carried">${w.customWeapons.map(cw => `<div class="citem"><div style="min-width:0"><div class="nm">${esc(cw.name)}</div><div class="meta">${esc(cw.type)} · ${esc(cw.dmg)} · ${cw.range ? cw.range + "cm" : "melee"} · ${cw.hands === 2 ? "two" : "one"}-handed${cw.rules.length ? " · " + esc(cw.rules.join(", ")) : ""}</div></div><span class="num">${cw.cost} cr</span><button class="btn sm danger" data-act="cwdel" data-v="${cw.id}">Remove</button></div>`).join("")}</div>
+      <p class="note">Custom weapons appear in every character's weapon list for this warband.</p>` : `<p class="empty">No custom weapons yet. Forged weapons are saved with this warband and show up in the weapon list on the Build tab.</p>`}
+    </div>
+  </div></div>`;
+}
+function cwCalc(k) {
+  return `<div><span>Max damage</span><span>${k.md}</span></div><div><span>Range</span><span>${k.rng}</span></div><div><span>One-handed</span><span>${k.oh}</span></div><div><span>Special rules</span><span>${sgn(k.sp) || 0}</span></div><div class="total"><span>Cost</span><span>${k.total} credits</span></div>`;
+}
+
+/* ---------- saved ---------- */
+function viewSaved() {
+  const list = Object.values(db.warbands).sort((a, b) => b.updated - a.updated);
+  return `<div class="page"><div class="two">
+    <div class="sec">
+      <div class="sec-h"><h2>Your warbands</h2><button class="btn primary sm" data-act="wb-new">+ New warband</button></div>
+      <p class="intro">Warbands are kept in this browser. To move one to another device or hand it to a friend, copy it as text and load it on the other side.</p>
+      <div class="saved">${list.map(w => `<div class="srow" aria-current="${w.id === db.current}">
+        <div style="min-width:0"><div style="font-weight:600">${esc(w.name)}</div><div class="note num">${wbTotal(w)} / ${w.limit} pts · ${w.characters.length} entries</div></div>
+        <div class="acts">
+          ${w.id === db.current ? `<span class="pill acc">Open</span>` : `<button class="btn sm" data-act="wb-open" data-v="${w.id}">Open</button>`}
+          <button class="btn sm" data-act="wb-copy" data-v="${w.id}">Copy as text</button>
+          ${ui.confirm === "wb:" + w.id ? `<button class="btn sm danger" data-act="wb-del-yes" data-v="${w.id}">Confirm</button>` : `<button class="btn sm danger" data-act="wb-del" data-v="${w.id}">Delete</button>`}
+        </div></div>`).join("")}</div>
+      <textarea class="input mono" id="export-box" readonly hidden style="min-height:120px;font-size:12px"></textarea>
+    </div>
+    <div class="sec">
+      <div class="sec-h"><h2>Load a warband</h2></div>
+      <p class="intro">Paste warband text someone copied from this builder.</p>
+      <textarea class="input mono" id="import-box" style="min-height:160px;font-size:12px" placeholder='{"name":"…","characters":[…]}'></textarea>
+      <div><button class="btn primary" data-act="wb-import">Load warband</button></div>
+    </div>
+  </div></div>`;
+}
+
+/* =====================================================================
+   EVENTS
+   ===================================================================== */
+function toast(msg) {
+  const t = $("#toast"); t.textContent = msg; t.hidden = false;
+  clearTimeout(toast._t); toast._t = setTimeout(() => t.hidden = true, 1800);
+}
+function refreshLight() {
+  // update totals without a full re-render (keeps focus in text inputs)
+  renderMeter();
+  const w = wb();
+  w.characters.forEach(c => { const el = document.querySelector(`[data-cost="${c.id}"]`); if (el) el.textContent = charCost(c); });
+  const cc = $("#wb-checks");
+  if (cc) cc.innerHTML = wbChecks().map(([lvl, m]) => `<div class="chk"><i class="dot ${lvl === "ok" ? "" : lvl === "bad" ? "bad" : "warn"}"></i><span>${esc(m)}</span></div>`).join("");
+}
+function applyFilter(kind) {
+  const val = (kind === "trait" ? ui.traitFilter : ui.weapFilter).toLowerCase().trim();
+  const scope = kind === "trait" ? "#list-trait [data-search]" : "[data-scroll='weap'] [data-search]";
+  document.querySelectorAll(scope).forEach(el => el.hidden = val && !el.dataset.search.includes(val));
+}
+
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-act]");
+  if (!b) return;
+  const act = b.dataset.act, v = b.dataset.v, w = wb(), c = ch();
+  switch (act) {
+    case "tab": ui.tab = v; ui.confirm = null; break;
+    case "quote": ui.quote = (ui.quote + 1) % QUOTES.length; renderQuote(); return;
+    case "select": ui.sel = v; ui.confirm = null; break;
+    case "add-char": { const n = newCharacter(`Recruit ${w.characters.length + 1}`); w.characters.push(n); ui.sel = n.id; ui.tab = "build"; break; }
+    case "dup": { const n = JSON.parse(JSON.stringify(c)); n.id = uid(); n.name = c.name + " (copy)"; w.characters.splice(w.characters.indexOf(c) + 1, 0, n); ui.sel = n.id; break; }
+    case "del": ui.confirm = c.id; break;
+    case "del-no": ui.confirm = null; break;
+    case "del-yes": { const i = w.characters.indexOf(c); w.characters.splice(i, 1); ui.sel = w.characters[Math.max(0, i - 1)]?.id ?? null; ui.confirm = null; break; }
+    case "squad": c.squad = b.checked; if (c.squad && c.size < RULES.squadMin) c.size = RULES.squadMin; break;
+    case "size": c.size = Math.min(RULES.squadMax, Math.max(RULES.squadMin, c.size + +v)); break;
+    case "skill": { const k = b.dataset.k; c.skills[k] = Math.min(RULES.skillMax, Math.max(RULES.skillMin, c.skills[k] + +v)); break; }
+    case "hp": c.hp = Math.max(RULES.hpMin, c.hp + +v * RULES.hpStep); break;
+    case "trait": c.traits = c.traits.includes(v) ? c.traits.filter(x => x !== v) : [...c.traits, v]; break;
+    case "tmode": ui.traitMode = v; break;
+    case "abil": c.abilities = c.abilities.includes(v) ? c.abilities.filter(x => x !== v) : [...c.abilities, v]; break;
+    case "wmode": ui.weapMode = v; break;
+    case "wadd": { const ex = c.weapons.find(x => x.id === v); if (ex) ex.qty++; else c.weapons.push({ id: v, qty: 1 }); toast(`${weaponById(v).name} added`); break; }
+    case "wqty": { const x = c.weapons[+b.dataset.i]; x.qty += +v; if (x.qty <= 0) c.weapons.splice(+b.dataset.i, 1); break; }
+    case "armour": c.armour = v; break;
+    case "iqty": { const q = Math.max(0, (c.items[v] || 0) + +b.dataset.d); if (q) c.items[v] = q; else delete c.items[v]; break; }
+    case "cwrule": ui.cw.rules = ui.cw.rules.includes(v) ? ui.cw.rules.filter(x => x !== v) : [...ui.cw.rules, v]; break;
+    case "cwsave": {
+      const f = ui.cw, k = cwCost(f);
+      if (!f.name.trim()) { toast("Give the weapon a name first"); $("#cw-name")?.focus(); return; }
+      if (!maxDamage(f.dmg)) { toast("Damage needs dice, like 2D6+2"); $("#cw-dmg")?.focus(); return; }
+      w.customWeapons = w.customWeapons || [];
+      w.customWeapons.push({ id: "cw-" + uid(), custom: true, name: f.name.trim(), type: [f.kind, ...f.keywords.split(",").map(s => s.trim()).filter(Boolean)].join(", "),
+        hands: f.oneHanded ? 1 : 2, dmg: f.dmg.toUpperCase().replace(/\s+/g, ""), rules: [...f.rules], ammo: f.rules.includes("Reload") ? f.ammo : undefined, range: f.kind === "Melee" ? 0 : +f.range || 0, cost: k.total });
+      toast(`${f.name.trim()} forged for ${k.total} credits`); ui.cw = blankCW(); break;
+    }
+    case "cwdel": w.customWeapons = w.customWeapons.filter(x => x.id !== v); w.characters.forEach(cc => cc.weapons = cc.weapons.filter(x => x.id !== v)); break;
+    case "wb-new": { const n = newWarband(); db.warbands[n.id] = n; db.current = n.id; ui.sel = null; ui.tab = "build"; break; }
+    case "wb-open": db.current = v; ui.sel = wb().characters[0]?.id ?? null; ui.tab = "build"; break;
+    case "wb-del": ui.confirm = "wb:" + v; break;
+    case "wb-del-yes": {
+      delete db.warbands[v]; ui.confirm = null;
+      if (!Object.keys(db.warbands).length) { const n = newWarband(); db.warbands[n.id] = n; }
+      if (!db.warbands[db.current]) { db.current = Object.keys(db.warbands)[0]; ui.sel = wb().characters[0]?.id ?? null; }
+      break;
+    }
+    case "wb-copy": {
+      const text = JSON.stringify(db.warbands[v]);
+      const box = $("#export-box"); box.hidden = false; box.value = text;
+      try { navigator.clipboard.writeText(text).then(() => toast("Warband copied"), () => { box.select(); toast("Select and copy the text below"); }); }
+      catch (err) { box.select(); toast("Select and copy the text below"); }
+      return;
+    }
+    case "wb-import": {
+      try {
+        const d = JSON.parse($("#import-box").value);
+        if (!d || !Array.isArray(d.characters)) throw 0;
+        d.id = uid(); d.updated = Date.now(); d.limit = +d.limit || RULES.defaultLimit; d.customWeapons = d.customWeapons || [];
+        d.characters.forEach(cc => { cc.id = cc.id || uid(); cc.items = cc.items || {}; cc.weapons = cc.weapons || []; cc.traits = (cc.traits || []).filter(n => TRAIT[n]); cc.abilities = (cc.abilities || []).filter(n => ABIL[n]); });
+        db.warbands[d.id] = d; db.current = d.id; ui.sel = d.characters[0]?.id ?? null; ui.tab = "build"; toast(`Loaded ${d.name}`);
+      } catch (err) { toast("That text isn't a warband from this builder"); return; }
+      break;
+    }
+    default: return;
+  }
+  save(); render();
+});
+
+document.addEventListener("input", e => {
+  const el = e.target, w = wb(), c = ch();
+  if (el.dataset.bind) {
+    if (el.dataset.bind === "wb-name") w.name = el.value;
+    if (el.dataset.bind === "wb-limit") w.limit = Math.max(0, parseInt(el.value, 10) || 0);
+    if (el.dataset.bind === "c-name") { c.name = el.value; const r = document.querySelector(`.rcard[aria-current="true"] .nm`); if (r && r.firstChild) r.firstChild.textContent = el.value || "Unnamed"; }
+    if (el.dataset.bind === "c-bg") c.background = el.value;
+    save(); refreshLight(); return;
+  }
+  if (el.dataset.filter) {
+    if (el.dataset.filter === "trait") ui.traitFilter = el.value; else ui.weapFilter = el.value;
+    applyFilter(el.dataset.filter); return;
+  }
+  if (el.dataset.cw) {
+    const key = el.dataset.cw;
+    ui.cw[key] = el.type === "checkbox" ? el.checked : el.value;
+    if (key === "kind" || key === "oneHanded") { render(); return; }
+    $("#cw-calc").innerHTML = cwCalc(cwCost(ui.cw));
+  }
+});
+document.addEventListener("change", e => { if (e.target.dataset.cw === "kind" || e.target.dataset.cw === "ammo") { ui.cw[e.target.dataset.cw] = e.target.value; render(); } });
+
+load(); render(); applyFilter("trait"); applyFilter("weap");
+</script>
