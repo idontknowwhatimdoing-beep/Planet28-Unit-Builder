@@ -10,6 +10,7 @@ A small, unofficial warband builder for **Planet 28 (2nd edition)** by Mammoth M
 - Squads of 3–10 members (profile cost × members)
 - Rule checks: minimum 2 characters, points limit, Barbaric vs Complex, Animal abilities, missing ammo for Reload weapons, clashing traits
 - Character sheets laid out like the book's (Ctrl/Cmd+P to print)
+- A photo for each character (shown on the roster and sheets)
 - Custom weapon forge using the book's formula (max damage + range, +10 one-handed, + special rules)
 - Several saved warbands per browser; copy a warband as text to share it
 

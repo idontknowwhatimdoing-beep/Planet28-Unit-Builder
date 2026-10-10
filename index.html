@@ -95,12 +95,13 @@ textarea.input { resize: vertical; min-height: 70px; }
 .wb-head { display: grid; gap: 10px; padding: 14px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); }
 .wb-head .row { display: grid; grid-template-columns: 1fr 96px; gap: 8px; }
 .roster { display: grid; gap: 6px; }
-.rcard { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 2px 8px; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--r); background: var(--panel); cursor: pointer; text-align: left; width: 100%; }
+.rcard { display: grid; grid-template-columns: 44px minmax(0,1fr) auto; gap: 2px 10px; align-items: center; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--r); background: var(--panel); cursor: pointer; text-align: left; width: 100%; }
 .rcard:hover { border-color: var(--muted); }
 .rcard[aria-current="true"] { border-color: var(--accent); box-shadow: inset 3px 0 0 var(--accent); }
-.rcard .nm { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rcard .nm { font-weight: 600; overflow-wrap: anywhere; }
 .rcard .c { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 14px; }
-.rcard .line { grid-column: 1 / -1; font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.rcard .av { grid-row: 1 / span 2; width: 44px; height: 44px; }
+.rcard .line { grid-column: 2 / -1; font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
 .pill { display: inline-block; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; padding: 1px 6px; border-radius: 99px; border: 1px solid var(--line); color: var(--muted); font-family: var(--font-body); vertical-align: 1px; margin-left: 4px; }
 .pill.acc { border-color: var(--accent); color: var(--accent); }
 .checks { display: grid; gap: 6px; padding: 12px 14px; border: 1px solid var(--line); border-radius: var(--r); background: var(--panel); font-size: 13px; }
@@ -192,6 +193,22 @@ textarea.input { resize: vertical; min-height: 70px; }
 
 .toggle { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; user-select: none; }
 .toggle input { width: 16px; height: 16px; accent-color: var(--accent); }
+
+/* ---------- photos ---------- */
+.av { border-radius: 4px; background: var(--panel-2); border: 1px solid var(--line); overflow: hidden; display: grid; place-items: center; color: var(--muted); font-family: var(--font-display); text-transform: uppercase; }
+.av img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.rcard .av { font-size: 18px; }
+.photo { width: 128px; height: 128px; font-size: 40px; position: relative; }
+.photo-wrap { display: grid; gap: 6px; justify-items: center; }
+.photo-wrap .acts { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; }
+.photo.drop { border: 2px dashed var(--accent); }
+.file-btn { position: relative; overflow: hidden; }
+.file-btn input { position: absolute; inset: 0; opacity: 0; cursor: pointer; font-size: 0; }
+.id-wrap { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 560px) { .id-wrap { grid-template-columns: minmax(0, 1fr); justify-items: start; } }
+.id-fields { display: grid; gap: 12px; min-width: 0; width: 100%; }
+.sheet-top { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; align-items: start; }
+.sheet-top .av { width: 88px; height: 88px; font-size: 30px; border-color: var(--ink); }
 
 /* ---------- empty state ---------- */
 .blank { text-align: center; padding: 48px 20px; border: 1px dashed var(--line); border-radius: var(--r); display: grid; gap: 12px; justify-items: center; color: var(--muted); }
@@ -464,7 +481,7 @@ let db = { current: null, warbands: {} };
 let ui = { tab: "build", sel: null, traitFilter: "", traitMode: "all", abilFilter: "", weapFilter: "", weapMode: "all", confirm: null, quote: 0, cw: null };
 
 function newCharacter(name = "New recruit") {
-  return { id: uid(), name, background: "", skills: { A: 1, S: 1, F: 1, P: 1, AW: 1 }, hp: 20, traits: [], abilities: [], weapons: [], armour: "none", items: {}, squad: false, size: 3 };
+  return { id: uid(), name, background: "", skills: { A: 1, S: 1, F: 1, P: 1, AW: 1 }, hp: 20, traits: [], abilities: [], weapons: [], armour: "none", items: {}, squad: false, size: 3, photo: null };
 }
 function newWarband(name = "Unnamed warband") {
   return { id: uid(), name, limit: RULES.defaultLimit, characters: [], customWeapons: [], updated: Date.now() };
@@ -502,9 +519,40 @@ function load() {
 }
 function save() {
   const w = wb(); if (w) w.updated = Date.now();
-  try { localStorage.setItem(STORE_KEY, JSON.stringify(db)); } catch (e) { /* ignore */ }
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(db)); return true; } catch (e) { return false; }
 }
 const wb = () => db.warbands[db.current];
+function avatar(c, cls = "") {
+  const initials = (c.name || "?").trim().split(/\s+/).slice(0, 2).map(x => x[0]).join("") || "?";
+  return `<div class="av ${cls}">${c.photo ? `<img src="${c.photo}" alt="${esc(c.name)}">` : esc(initials)}</div>`;
+}
+// Shrink a picked image to a 320px centre-cropped square JPEG so it fits in browser storage
+function shrinkImage(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      const S = 320, side = Math.min(img.naturalWidth, img.naturalHeight);
+      const cv = document.createElement("canvas"); cv.width = cv.height = S;
+      cv.getContext("2d").drawImage(img, (img.naturalWidth - side) / 2, (img.naturalHeight - side) / 2, side, side, 0, 0, S, S);
+      URL.revokeObjectURL(url);
+      resolve(cv.toDataURL("image/jpeg", 0.82));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("bad image")); };
+    img.src = url;
+  });
+}
+async function setPhoto(file) {
+  const c = ch();
+  if (!c || !file) return;
+  if (!/^image\//.test(file.type)) { toast("That file isn't a picture"); return; }
+  try {
+    const before = c.photo;
+    c.photo = await shrinkImage(file);
+    if (!save()) { c.photo = before; toast("Browser storage is full. Remove some photos or old warbands."); return; }
+    render(); toast("Photo added");
+  } catch (e) { toast("Couldn't read that picture"); }
+}
 const ch = () => wb()?.characters.find(c => c.id === ui.sel);
 
 function weaponById(id, w = wb()) {
@@ -635,6 +683,7 @@ function viewBuild() {
         ${w.characters.map(c => {
           const p = costParts(c);
           return `<button class="rcard" data-act="select" data-v="${c.id}" aria-current="${c.id === ui.sel}">
+            ${avatar(c)}
             <span class="nm">${esc(c.name || "Unnamed")}${c.squad ? `<span class="pill acc">Squad ×${c.size}</span>` : ""}</span>
             <span class="c" data-cost="${c.id}">${p.total}</span>
             <span class="line">A${c.skills.A} S${c.skills.S} F${c.skills.F} P${c.skills.P} AW${c.skills.AW} · ${c.hp}HP</span>
@@ -663,6 +712,15 @@ function viewChar(c) {
         ${ui.confirm === c.id ? `<button class="btn sm danger" data-act="del-yes">Confirm delete</button><button class="btn sm" data-act="del-no">Keep</button>` : `<button class="btn sm danger" data-act="del">Delete</button>`}
       </div>
     </div>
+    <div class="id-wrap">
+    <div class="photo-wrap">
+      <div class="photo-drop" data-drop="photo" title="Drop a picture here">${avatar(c, "photo")}</div>
+      <div class="acts">
+        <label class="btn sm file-btn">${c.photo ? "Change" : "Add photo"}<input type="file" accept="image/*" id="c-photo" data-photo="1"></label>
+        ${c.photo ? `<button class="btn sm ghost" data-act="photo-del">Remove</button>` : ""}
+      </div>
+    </div>
+    <div class="id-fields">
     <div class="id-grid">
       <label class="field"><span>Name</span><input class="input" id="c-name" data-bind="c-name" value="${esc(c.name)}"></label>
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding-bottom:6px">
@@ -671,6 +729,8 @@ function viewChar(c) {
       </div>
     </div>
     <label class="field"><span>Who are they?</span><textarea class="input" id="c-bg" data-bind="c-bg" placeholder="Who are they, why are they part of this warband, what are their strengths and weaknesses?">${esc(c.background)}</textarea></label>
+    </div>
+    </div>
     ${c.squad ? `<p class="intro">Squads move and act as one unit. Every member shares this profile and equipment, and the cost is the profile × members. If a squad drops to 2 members they become independent characters. At least 75% of members must carry the same weapons.</p>` : ""}
   </div>
 
@@ -824,7 +884,7 @@ function viewSheets() {
     ];
     return `<article class="sheet">
       <div class="sheet-h"><h3>${esc(c.name || "Unnamed")}${c.squad ? ` <span class="pill acc">Squad ×${c.size}</span>` : ""}</h3><span class="num">Points cost: <b>${p.total}</b>${c.squad ? ` <span class="muted">(${p.each} each)</span>` : ""}</span></div>
-      ${c.background ? `<div class="bg">${esc(c.background)}</div>` : ""}
+      ${c.photo || c.background ? `<div class="sheet-top">${c.photo ? avatar(c) : ""}${c.background ? `<div class="bg">${esc(c.background)}</div>` : ""}</div>` : ""}
       <div class="sstats">
         ${SKILLS.map(s => `<div><div class="k">${s.name}</div><div class="v">${c.skills[s.k]}</div></div>`).join("")}
         <div><div class="k">Speed</div><div class="v">${sp.s}<span style="font-size:11px">cm</span></div></div>
@@ -954,6 +1014,7 @@ document.addEventListener("click", e => {
     case "wadd": { const ex = c.weapons.find(x => x.id === v); if (ex) ex.qty++; else c.weapons.push({ id: v, qty: 1 }); toast(`${weaponById(v).name} added`); break; }
     case "wqty": { const x = c.weapons[+b.dataset.i]; x.qty += +v; if (x.qty <= 0) c.weapons.splice(+b.dataset.i, 1); break; }
     case "armour": c.armour = v; break;
+    case "photo-del": c.photo = null; break;
     case "iqty": { const q = Math.max(0, (c.items[v] || 0) + +b.dataset.d); if (q) c.items[v] = q; else delete c.items[v]; break; }
     case "cwrule": ui.cw.rules = ui.cw.rules.includes(v) ? ui.cw.rules.filter(x => x !== v) : [...ui.cw.rules, v]; break;
     case "cwsave": {
@@ -1017,7 +1078,12 @@ document.addEventListener("input", e => {
     $("#cw-calc").innerHTML = cwCalc(cwCost(ui.cw));
   }
 });
-document.addEventListener("change", e => { if (e.target.dataset.cw === "kind" || e.target.dataset.cw === "ammo") { ui.cw[e.target.dataset.cw] = e.target.value; render(); } });
+document.addEventListener("change", e => {
+  if (e.target.dataset.photo) { setPhoto(e.target.files[0]); e.target.value = ""; return; } if (e.target.dataset.cw === "kind" || e.target.dataset.cw === "ammo") { ui.cw[e.target.dataset.cw] = e.target.value; render(); } });
+
+document.addEventListener("dragover", e => { const d = e.target.closest("[data-drop]"); if (d) { e.preventDefault(); d.firstElementChild.classList.add("drop"); } });
+document.addEventListener("dragleave", e => { const d = e.target.closest("[data-drop]"); if (d) d.firstElementChild.classList.remove("drop"); });
+document.addEventListener("drop", e => { const d = e.target.closest("[data-drop]"); if (d) { e.preventDefault(); setPhoto(e.dataTransfer.files[0]); } });
 
 load(); render(); applyFilter("trait"); applyFilter("weap");
 </script>
